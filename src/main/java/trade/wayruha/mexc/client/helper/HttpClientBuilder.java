@@ -1,28 +1,31 @@
-package trade.wayruha.mexc.client;
+package trade.wayruha.mexc.client.helper;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.security.SignatureInterceptor;
 
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 public class HttpClientBuilder {
 
-    private final APIConfiguration config;
+    private final MexcConfig config;
     private final HttpLoggingInterceptor loggingInterceptor;
 
-    public HttpClientBuilder(final APIConfiguration config) {
+    public HttpClientBuilder(final MexcConfig config) {
         this.config = config;
         this.loggingInterceptor = null;
     }
 
-    public HttpClientBuilder(final APIConfiguration config, HttpLoggingInterceptor loggingInterceptor) {
+    public HttpClientBuilder(final MexcConfig config, HttpLoggingInterceptor loggingInterceptor) {
         this.config = config;
         this.loggingInterceptor = loggingInterceptor;
     }
 
     public OkHttpClient buildClient() {
         final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-        final SignatureInterceptor signatureInterceptor = new SignatureInterceptor(config.getApiKey(), config.getApiSecret());
         clientBuilder.connectTimeout(this.config.getConnectTimeout(), TimeUnit.SECONDS)
                 .readTimeout(this.config.getReadTimeout(), TimeUnit.SECONDS)
                 .writeTimeout(this.config.getWriteTimeout(), TimeUnit.SECONDS)
@@ -30,7 +33,10 @@ public class HttpClientBuilder {
         if (this.config.isPrint() && loggingInterceptor != null) {
             clientBuilder.addInterceptor(loggingInterceptor);
         }
-        clientBuilder.addInterceptor(signatureInterceptor);
+        if(isNotEmpty(config.getApiKey())) {
+            final SignatureInterceptor signatureInterceptor = new SignatureInterceptor(config.getApiKey(), config.getApiSecret());
+            clientBuilder.addInterceptor(signatureInterceptor);
+        }
         return clientBuilder.build();
     }
 }

@@ -1,7 +1,7 @@
 package trade.wayruha.mexc.service;
 
 import trade.wayruha.mexc.Constants;
-import trade.wayruha.mexc.client.APIConfiguration;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.client.ApiClient;
 
 public abstract class ServiceBase {
@@ -12,8 +12,8 @@ public abstract class ServiceBase {
         this.client = client;
     }
 
-    public ServiceBase(APIConfiguration config) {
-        this.client = new ApiClient(config);
+    public ServiceBase(MexcConfig config) {
+        this(new ApiClient(config));
     }
 
     protected <T> T createService(Class<T> apiClass) {

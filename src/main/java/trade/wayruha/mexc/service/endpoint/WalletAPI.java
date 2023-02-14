@@ -1,4 +1,4 @@
-package trade.wayruha.mexc.service;
+package trade.wayruha.mexc.service.endpoint;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

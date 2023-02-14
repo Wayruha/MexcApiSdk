@@ -1,25 +1,34 @@
 package trade.wayruha.mexc.client;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.MexcApiException;
+import trade.wayruha.mexc.MexcResponse;
+import trade.wayruha.mexc.client.helper.HttpClientBuilder;
+import trade.wayruha.mexc.client.helper.RetrofitBuilder;
 
 import java.io.IOException;
 
 @Slf4j
 public class ApiClient {
-    private final APIConfiguration config;
+    @Getter
+    private final MexcConfig config;
     private OkHttpClient httpClient;
     private final Retrofit retrofit;
 
-    public ApiClient(APIConfiguration config) {
+    public ApiClient(MexcConfig config) {
         this(config, new HttpClientBuilder(config));
     }
 
-    public ApiClient(APIConfiguration config, HttpClientBuilder httpClientBuilder) {
+    public ApiClient(MexcConfig config, HttpClientBuilder httpClientBuilder) {
         this.config = config;
         this.httpClient = httpClientBuilder.buildClient();
         this.retrofit = RetrofitBuilder.buildRetrofit(config, this.httpClient);
@@ -34,7 +43,7 @@ public class ApiClient {
             final Response<T> response = call.execute();
             final T body = response.body();
             if (response.isSuccessful()) {
-                return new MexcResponse<>(body);
+                return new MexcResponse<>(response.code(), body);
             } else {
                 log.error("Request failed: {} ", response);
                 throw new MexcApiException(response.code(), response.message());
@@ -43,5 +52,9 @@ public class ApiClient {
             log.error("Request failed: {} ", call.request(), e);
             throw new MexcApiException(e.getMessage(), e);
         }
+    }
+
+    public WebSocket createWebSocket(Request request, WebSocketListener listener) {
+        return httpClient.newWebSocket(request, listener);
     }
 }

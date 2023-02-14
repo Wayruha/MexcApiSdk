@@ -1,18 +1,17 @@
-package trade.wayruha.mexc;
+package trade.wayruha.mexc.service;
 
 import org.junit.Assert;
 import org.junit.Test;
-import trade.wayruha.mexc.client.APIConfiguration;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.dto.PostOrder;
 import trade.wayruha.mexc.enums.OrderSide;
 import trade.wayruha.mexc.enums.OrderType;
-import trade.wayruha.mexc.service.TradeService;
 
 import java.math.BigDecimal;
 
 public class TradeServiceTest {
-    APIConfiguration apiConfiguration = new APIConfiguration("", "");
+    MexcConfig apiConfiguration = new MexcConfig("", "");
     final TradeService service = new TradeService(apiConfiguration);
 
     @Test

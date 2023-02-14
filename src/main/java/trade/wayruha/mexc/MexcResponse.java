@@ -1,17 +1,19 @@
-package trade.wayruha.mexc.client;
+package trade.wayruha.mexc;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@Getter
+@ToString
 public class MexcResponse<T> {
     private int responseHttpStatus;
-    @Getter
     private T data;
     private int cloudLimit;
     private String message;
 
-    public MexcResponse(T data) {
+    public MexcResponse(int responseHttpStatus, T data) {
         this.data = data;
+        this.responseHttpStatus = responseHttpStatus;
     }
 
     public MexcResponse(int responseHttpStatus, String message) {

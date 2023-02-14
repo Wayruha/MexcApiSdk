@@ -1,4 +1,4 @@
-package trade.wayruha.mexc;
+package trade.wayruha.mexc.security;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

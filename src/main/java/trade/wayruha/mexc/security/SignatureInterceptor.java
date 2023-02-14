@@ -1,11 +1,11 @@
-package trade.wayruha.mexc.client;
+package trade.wayruha.mexc.security;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
 import trade.wayruha.mexc.Constants;
-import trade.wayruha.mexc.SignatureUtil;
+import trade.wayruha.mexc.security.SignatureUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -39,7 +39,7 @@ public class SignatureInterceptor implements Interceptor {
         if (isSigned) {
             newBuilder.addHeader(HEADER_ACCESS_KEY, apiKey);
             final RequestBody origBody = origRequest.body();
-            if (origBody != null) {
+            if (origBody != null && origBody.contentLength() > 0) {
                 // encode RequestBody
                 final String newBody = encodeBody(origBody);
                 switch (method) {
@@ -95,7 +95,8 @@ public class SignatureInterceptor implements Interceptor {
                 .newBuilder()
                 .setQueryParameter(TIMESTAMP_PARAM, timestamp);
         String queryParams = urlBuilder.build().query();
-        urlBuilder.setQueryParameter(SIGNATURE_PARAM, SignatureUtil.actualSignature(queryParams, secretKey));
+        final String signature = SignatureUtil.actualSignature(queryParams, secretKey);
+        urlBuilder.setQueryParameter(SIGNATURE_PARAM, signature);
         return request.newBuilder()
                 .addHeader(HEADER_ACCESS_KEY, apiKey)
                 .url(urlBuilder.build()).build();

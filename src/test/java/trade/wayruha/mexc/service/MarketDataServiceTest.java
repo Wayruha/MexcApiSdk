@@ -1,14 +1,13 @@
-package trade.wayruha.mexc;
+package trade.wayruha.mexc.service;
 
 import org.junit.Test;
-import trade.wayruha.mexc.client.APIConfiguration;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.dto.ExchangeInfo;
-import trade.wayruha.mexc.service.MarketDataService;
 
 import static org.junit.Assert.assertFalse;
 
 public class MarketDataServiceTest {
-    final MarketDataService service = new MarketDataService(new APIConfiguration());
+    final MarketDataService service = new MarketDataService(new MexcConfig());
 
     @Test
     public void test_loadExchangeInfo() {

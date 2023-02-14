@@ -1,26 +1,29 @@
-package trade.wayruha.mexc.client;
+package trade.wayruha.mexc;
 
 import lombok.Data;
 import trade.wayruha.mexc.constant.APIConstants;
 
 @Data
-public class APIConfiguration {
-    public static final String DEFAULT_ENDPOINT = "https://api.mexc.com/";
+public class MexcConfig {
+    public static final String DEFAULT_HTTP_HOST = "https://api.mexc.com/";
+    public static final String DEFAULT_WS_HOST = "wss://wbs.mexc.com/ws";
 
     private String endpoint;
     private String apiKey;
     private String apiSecret;
     private String passphrase;
+    private String httpHost = DEFAULT_HTTP_HOST;
+    private String webSocketHost = DEFAULT_WS_HOST;
 
-    public APIConfiguration() {
-        this(DEFAULT_ENDPOINT, null, null);
+    public MexcConfig() {
+        this(DEFAULT_HTTP_HOST, null, null);
     }
 
-    public APIConfiguration(String apiKey, String apiSecret) {
-        this(DEFAULT_ENDPOINT, apiKey, apiSecret);
+    public MexcConfig(String apiKey, String apiSecret) {
+        this(DEFAULT_HTTP_HOST, apiKey, apiSecret);
     }
 
-    public APIConfiguration(String endpoint, String apiKey, String apiSecret) {
+    public MexcConfig(String endpoint, String apiKey, String apiSecret) {
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
         this.passphrase = null;

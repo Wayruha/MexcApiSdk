@@ -1,14 +1,15 @@
-package trade.wayruha.mexc.client;
+package trade.wayruha.mexc.client.helper;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import trade.wayruha.mexc.MexcConfig;
 
 public class RetrofitBuilder {
 
-    public static Retrofit buildRetrofit(APIConfiguration configuration, OkHttpClient httpClient) {
+    public static Retrofit buildRetrofit(MexcConfig configuration, OkHttpClient httpClient) {
         final ObjectMapper objectMapper = createObjectMapper();
 
         Retrofit.Builder builder = new Retrofit.Builder();

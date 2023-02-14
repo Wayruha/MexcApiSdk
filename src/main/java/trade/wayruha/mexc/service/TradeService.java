@@ -1,13 +1,14 @@
 package trade.wayruha.mexc.service;
 
-import trade.wayruha.mexc.client.APIConfiguration;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.dto.PostOrder;
+import trade.wayruha.mexc.service.endpoint.TradeAPI;
 
 public class TradeService extends ServiceBase {
     private final TradeAPI api;
 
-    public TradeService(APIConfiguration config) {
+    public TradeService(MexcConfig config) {
         super(config);
         this.api = createService(TradeAPI.class);
     }
