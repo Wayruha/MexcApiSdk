@@ -5,6 +5,14 @@ import lombok.Data;
 
 @Data
 public class MexcWSResponse<T> {
+
+    //Properties for base response from stream
+    private String id;
+    private String code;
+    @JsonProperty("msg")
+    private String message;
+
+    //Main properties
     @JsonProperty("d")
     private T data;
     @JsonProperty("c")

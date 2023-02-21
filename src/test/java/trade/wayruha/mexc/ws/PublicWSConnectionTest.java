@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.junit.Test;
 import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.enums.TopLimit;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +21,7 @@ public class PublicWSConnectionTest {
     public void test_OrderBookSubscription() {
         final Set<String> symbols = Set.of("BTCUSDT", "ETHUSDT");
         final Callback callback = new Callback();
-        final WebSocketClient ws = factory.orderBookSubscription(symbols, 5, callback, Object.class);
+        final WebSocketClient ws = factory.orderBookSubscription(symbols, TopLimit.TOP5, callback);
         sleep(5_000);
         assertTrue(wsOpenCounter.get() > 0);
         assertTrue(wsResponseCounter.get() > 0);

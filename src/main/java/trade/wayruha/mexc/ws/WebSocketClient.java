@@ -1,6 +1,7 @@
 package trade.wayruha.mexc.ws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,17 +12,21 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.dto.WSBaseDto;
+import trade.wayruha.mexc.enums.WSState;
 import trade.wayruha.mexc.utils.IdGenerator;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Objects.nonNull;
 import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION;
 
 @Slf4j
-public class WebSocketClient<T> extends WebSocketListener {
+public class WebSocketClient<T extends WSBaseDto> extends WebSocketListener {
     protected final MexcConfig config;
     protected final ApiClient apiClient;
     protected final WebSocketCallback<T> callback;
@@ -127,10 +132,14 @@ public class WebSocketClient<T> extends WebSocketListener {
         super.onMessage(webSocket, text);
         lastReceivedTime = System.currentTimeMillis();
         log.trace("{} onMessage: {}", logPrefix, text);
-
         try {
-            final T obj = objectMapper.readValue(text, type);
-            callback.onResponse(obj);
+            JavaType typeMap = objectMapper.getTypeFactory().constructParametricType(MexcWSResponse.class, type);
+            MexcWSResponse<T> obj = objectMapper.readValue(text, typeMap);
+            T data = obj.getData();
+            if (nonNull(data) && nonNull(obj.getSymbol())) {
+                data.setSymbol(obj.getSymbol());
+            }
+            callback.onResponse(data);
         } catch (JsonProcessingException e) {
             log.error("{} Deserialization error {} for {}", log, e.getMessage(), text);
             closeOnError(e);
@@ -176,6 +185,6 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     enum Action {
-        SUBSCRIPTION, UNSUBSCRIPTION, PING;
+        SUBSCRIPTION, UNSUBSCRIPTION, PING
     }
 }

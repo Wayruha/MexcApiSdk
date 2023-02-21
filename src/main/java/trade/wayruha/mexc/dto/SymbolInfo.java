@@ -1,8 +1,8 @@
 package trade.wayruha.mexc.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.Data;
+import lombok.*;
 import trade.wayruha.mexc.enums.OrderType;
 import trade.wayruha.mexc.enums.Permission;
 import trade.wayruha.mexc.enums.TradeSymbolStatus;
@@ -10,9 +10,13 @@ import trade.wayruha.mexc.enums.TradeSymbolStatus;
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
-public class SymbolInfo {
-    private String symbol;
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class SymbolInfo extends WSBaseDto {
     private TradeSymbolStatus status;
     private String baseAsset;
     private String quoteAsset;

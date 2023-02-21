@@ -1,13 +1,19 @@
 package trade.wayruha.mexc.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@Data
-public class OrderBook {
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OrderBook extends WSBaseDto {
     private List<Level> asks;
     private List<Level> bids;
     @JsonProperty("e")
