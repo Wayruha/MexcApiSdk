@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum TopLimit {
+public enum OrderBookDepth {
     TOP5(5),
     TOP10(10),
     TOP20(20),
     ;
-    private final int limit;
+    private final int depth;
 }

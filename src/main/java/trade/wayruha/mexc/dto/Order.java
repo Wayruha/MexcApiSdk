@@ -3,7 +3,7 @@ package trade.wayruha.mexc.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Data;
 import trade.wayruha.mexc.enums.OrderSide;
 import trade.wayruha.mexc.enums.OrderStatus;
 import trade.wayruha.mexc.enums.OrderType;
@@ -11,13 +11,10 @@ import trade.wayruha.mexc.enums.TimeInForce;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Order extends WSBaseDto {
+public class Order{
+    private String symbol;
     @JsonAlias({"i"})
     private String orderId;
     private long orderListId;

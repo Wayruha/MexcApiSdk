@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
-import trade.wayruha.mexc.dto.WSBaseDto;
 import trade.wayruha.mexc.service.PrivateWSSubscriptionService;
 
 import java.util.Set;
@@ -23,13 +23,13 @@ import static trade.wayruha.mexc.constant.GlobalParams.*;
  * !!!WARNING!!! Not tested!
  */
 @Slf4j
-public class AutoRenewalPrivateWSClient<T extends WSBaseDto> extends WebSocketClient<T> {
+public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
     private PrivateWSSubscriptionService wsService = new PrivateWSSubscriptionService(apiClient);
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledKeepAliveTask;
     private ScheduledFuture<?> scheduledResubscribeTask;
 
-    AutoRenewalPrivateWSClient(Set<String> channels, WebSocketCallback<T> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
+    AutoRenewalPrivateWSClient(Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         super(channels, listener, type, apiClient, mapper);
     }
 

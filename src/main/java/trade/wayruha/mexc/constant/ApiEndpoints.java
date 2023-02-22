@@ -2,7 +2,7 @@ package trade.wayruha.mexc.constant;
 
 public class ApiEndpoints {
 
-    //<editor-fold desc="Public WebSocket streams endpoints">
+    //Public WebSocket streams endpoints
     /**
      * Partial Book Depth Streams.
      *
@@ -37,10 +37,10 @@ public class ApiEndpoints {
      * @apiNote e.g. request: spot@public.bookTicker.v3.api@BTCUSDT
      */
     public static final String INDIVIDUAL_SYMBOL_BOOK_CHANNEL_FORMAT = "spot@public.bookTicker.v3.api@%s";
-    //</editor-fold>
 
 
-    //<editor-fold desc="Private WebSocket streams endpoint">
+
+    //Private WebSocket streams endpoint
     /**
      * Spot Account Orders Stream
      */
@@ -62,5 +62,4 @@ public class ApiEndpoints {
      * @apiNote e.g. request: margin@private.risk.rate.v3.api@BTCUSDT
      */
     public static final String USER_MARGIN_RISK_RATE_CHANNEL_FORMAT = "margin@private.risk.rate.v3.api@%s";
-    //</editor-fold>
 }

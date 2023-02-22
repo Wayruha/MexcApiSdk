@@ -3,6 +3,8 @@ package trade.wayruha.mexc;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import static java.util.Objects.isNull;
+
 @Data
 public class MexcWSResponse<T> {
 
@@ -21,4 +23,16 @@ public class MexcWSResponse<T> {
     private String symbol;
     @JsonProperty("t")
     private long timestamp;
+
+    public String toStringShort() {
+        return "MexcWSResponse_Short{" +
+                "id='" + id + '\'' +
+                ", code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                ", channel='" + channel + '\'' +
+                ", symbol='" + symbol + '\'' +
+                ", timestamp=" + timestamp +
+                ", dataIsNull=" + isNull(data) +
+                '}';
+    }
 }
