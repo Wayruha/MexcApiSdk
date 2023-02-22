@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
 import trade.wayruha.mexc.service.PrivateWSSubscriptionService;
 
@@ -13,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Objects.isNull;
 import static trade.wayruha.mexc.Constants.LISTEN_KEY_QUERY_PARAM;
 import static trade.wayruha.mexc.constant.GlobalParams.*;
 
@@ -23,11 +25,11 @@ import static trade.wayruha.mexc.constant.GlobalParams.*;
 @Slf4j
 public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
     private PrivateWSSubscriptionService wsService = new PrivateWSSubscriptionService(apiClient);
-    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledKeepAliveTask;
     private ScheduledFuture<?> scheduledResubscribeTask;
 
-    AutoRenewalPrivateWSClient(Set<String> channels, WebSocketCallback<T> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
+    AutoRenewalPrivateWSClient(Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         super(channels, listener, type, apiClient, mapper);
     }
 
@@ -43,8 +45,10 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
         super.connect(channels);
 
         final KeepAliveTask keepAliveTask = new KeepAliveTask(listenKey);
-        this.scheduledKeepAliveTask = scheduler.scheduleAtFixedRate(keepAliveTask, WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, TimeUnit.MINUTES);
-        this.scheduledResubscribeTask = scheduler.scheduleAtFixedRate(new ResubscribeTask(), WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, TimeUnit.MINUTES);
+        this.scheduledKeepAliveTask = this.getScheduler().scheduleAtFixedRate(keepAliveTask,
+                WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, TimeUnit.MINUTES);
+        this.scheduledResubscribeTask = this.getScheduler().scheduleAtFixedRate(new ResubscribeTask(),
+                WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, TimeUnit.MINUTES);
     }
 
     @Override
@@ -74,6 +78,13 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
         }
     }
 
+    private ScheduledExecutorService getScheduler(){
+        if(isNull(this.scheduler)){
+            this.scheduler = Executors.newSingleThreadScheduledExecutor();
+        }
+        return this.scheduler;
+    }
+
     class ResubscribeTask implements Runnable {
         @SneakyThrows
         @Override
@@ -87,4 +98,5 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
             }
         }
     }
+
 }

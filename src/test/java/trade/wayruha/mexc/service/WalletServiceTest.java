@@ -7,8 +7,11 @@ import trade.wayruha.mexc.dto.Order;
 
 import java.util.List;
 
+import static trade.wayruha.mexc.util.TestConstants.API_KEY;
+import static trade.wayruha.mexc.util.TestConstants.API_SECRET;
+
 public class WalletServiceTest {
-    MexcConfig apiConfiguration = new MexcConfig("", "");
+    MexcConfig apiConfiguration = new MexcConfig(API_KEY, API_SECRET);
     final WalletService walletService = new WalletService(apiConfiguration);
 
     @Test

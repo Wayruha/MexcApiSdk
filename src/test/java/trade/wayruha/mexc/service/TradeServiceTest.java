@@ -10,8 +10,11 @@ import trade.wayruha.mexc.enums.OrderType;
 
 import java.math.BigDecimal;
 
+import static trade.wayruha.mexc.util.TestConstants.API_KEY;
+import static trade.wayruha.mexc.util.TestConstants.API_SECRET;
+
 public class TradeServiceTest {
-    MexcConfig apiConfiguration = new MexcConfig("", "");
+    MexcConfig apiConfiguration = new MexcConfig(API_KEY, API_SECRET);
     final TradeService service = new TradeService(apiConfiguration);
 
     @Test

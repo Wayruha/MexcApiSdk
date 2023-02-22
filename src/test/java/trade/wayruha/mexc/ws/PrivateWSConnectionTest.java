@@ -10,21 +10,25 @@ import trade.wayruha.mexc.service.PrivateWSSubscriptionService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertTrue;
+import static trade.wayruha.mexc.util.TestConstants.API_KEY;
+import static trade.wayruha.mexc.util.TestConstants.API_SECRET;
 
 public class PrivateWSConnectionTest {
-    final MexcConfig config = new MexcConfig();
+
+    final MexcConfig config = new MexcConfig(API_KEY, API_SECRET);
     final ApiClient apiClient = new ApiClient(config);
     final WSClientFactory factory = new WSClientFactory(apiClient);
     final AtomicInteger wsOpenCounter = new AtomicInteger();
     final AtomicInteger wsResponseCounter = new AtomicInteger();
     final PrivateWSSubscriptionService privateAPI = new PrivateWSSubscriptionService(apiClient);
 
+
+
     @Test
     public void test_userSpotAccountTrade() {
         final String listenKey = privateAPI.createListenKey();
-
         final Callback callback = new Callback();
-        final WebSocketClient ws = factory.userSpotTradesSubscription(listenKey, callback, Object.class);
+        final WebSocketClient ws = factory.userSpotTradesSubscription(listenKey, callback);
         sleep(10_000);
         assertTrue(wsOpenCounter.get() > 0);
         assertTrue(wsResponseCounter.get() > 0);

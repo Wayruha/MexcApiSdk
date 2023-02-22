@@ -1,6 +1,7 @@
 package trade.wayruha.mexc.ws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +12,9 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.enums.WSState;
 import trade.wayruha.mexc.utils.IdGenerator;
 
 import java.util.Collection;
@@ -24,7 +27,7 @@ import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_MAX_CHANNELS_P
 public class WebSocketClient<T> extends WebSocketListener {
     protected final MexcConfig config;
     protected final ApiClient apiClient;
-    protected final WebSocketCallback<T> callback;
+    protected final WebSocketCallback<MexcWSResponse<T>> callback;
     @Getter
     protected final Set<String> channels;
     @Getter
@@ -39,11 +42,11 @@ public class WebSocketClient<T> extends WebSocketListener {
     private WebSocket webSocket;
     private long lastReceivedTime;
 
-    WebSocketClient(Set<String> channels, WebSocketCallback<T> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
+    WebSocketClient(Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         this(buildRequestFromHost(apiClient.getConfig().getWebSocketHost()), channels, listener, type, apiClient, mapper);
     }
 
-    WebSocketClient(Request connectionRequest, Set<String> channels, WebSocketCallback<T> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
+    WebSocketClient(Request connectionRequest, Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         this.id = IdGenerator.getNextId();
         this.logPrefix = "[ws-" + this.id + "]";
         this.channels = new HashSet<>();
@@ -127,9 +130,9 @@ public class WebSocketClient<T> extends WebSocketListener {
         super.onMessage(webSocket, text);
         lastReceivedTime = System.currentTimeMillis();
         log.trace("{} onMessage: {}", logPrefix, text);
-
         try {
-            final T obj = objectMapper.readValue(text, type);
+            JavaType typeMap = objectMapper.getTypeFactory().constructParametricType(MexcWSResponse.class, type);
+            MexcWSResponse<T> obj = objectMapper.readValue(text, typeMap);
             callback.onResponse(obj);
         } catch (JsonProcessingException e) {
             log.error("{} Deserialization error {} for {}", log, e.getMessage(), text);
@@ -176,6 +179,6 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     enum Action {
-        SUBSCRIPTION, UNSUBSCRIPTION, PING;
+        SUBSCRIPTION, UNSUBSCRIPTION, PING
     }
 }

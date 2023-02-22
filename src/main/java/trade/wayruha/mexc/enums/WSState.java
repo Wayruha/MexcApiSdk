@@ -1,4 +1,4 @@
-package trade.wayruha.mexc.ws;
+package trade.wayruha.mexc.enums;
 
 public enum WSState {
   IDLE,
