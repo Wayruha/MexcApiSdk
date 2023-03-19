@@ -10,8 +10,7 @@ import trade.wayruha.mexc.enums.OrderType;
 
 import java.math.BigDecimal;
 
-import static trade.wayruha.mexc.util.TestConstants.API_KEY;
-import static trade.wayruha.mexc.util.TestConstants.API_SECRET;
+import static trade.wayruha.mexc.util.TestConstants.*;
 
 public class TradeServiceTest {
     MexcConfig apiConfiguration = new MexcConfig(API_KEY, API_SECRET);
@@ -25,7 +24,7 @@ public class TradeServiceTest {
 
     private static PostOrder makeOrder() {
         return PostOrder.builder()
-                .symbol("BTCUSDT")
+                .symbol(BTC_USD_PAIR_SYMBOL)
                 .side(OrderSide.BUY).type(OrderType.MARKET)
                 .quoteOrderQty(BigDecimal.TEN)
                 .build();

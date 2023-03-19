@@ -162,7 +162,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     private void closeOnError(Throwable ex) {
-        log.error("{} [Connection error] Connection is closing due to error: {}", logPrefix, ex != null ? ex.getMessage() : null);
+        log.warn("{} [Connection error] Connection is closing due to error: {}", logPrefix, ex != null ? ex.getMessage() : null);
         close();
         state = WSState.CLOSED_ON_ERROR;
     }
