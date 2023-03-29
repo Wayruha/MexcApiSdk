@@ -12,8 +12,8 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import trade.wayruha.mexc.MexcConfig;
-import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.dto.MexcWSResponse;
 import trade.wayruha.mexc.enums.WSState;
 import trade.wayruha.mexc.utils.IdGenerator;
 

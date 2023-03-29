@@ -3,9 +3,11 @@ package trade.wayruha.mexc.constant;
 public class ApiEndpoints {
 
     //Market Data Endpoints
-
     /** If the symbol is not sent, all symbols will be returned in an array.*/
     public static final String SYMBOL_PRICE_TICKER_API_PATH = "/api/v3/ticker/price";
+
+    /** If the symbol is not sent, all symbols will be returned in an array.*/
+    public static final String USER_ACCOUNT_DATA_API_PATH = "/api/v3/account";
 
 
     //Public WebSocket streams endpoints
@@ -47,6 +49,12 @@ public class ApiEndpoints {
 
 
     //Private WebSocket streams endpoint
+    /**
+     * Spot Account Update
+     */
+    public static final String USER_ACCOUNT_ASSETS_CHANNEL_FORMAT = "spot@private.account.v3.api";
+
+
     /**
      * Spot Account Orders Stream
      */

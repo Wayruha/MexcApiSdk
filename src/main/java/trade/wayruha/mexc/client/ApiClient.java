@@ -9,11 +9,11 @@ import okhttp3.WebSocketListener;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.MexcApiException;
-import trade.wayruha.mexc.MexcResponse;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.client.helper.HttpClientBuilder;
 import trade.wayruha.mexc.client.helper.RetrofitBuilder;
+import trade.wayruha.mexc.dto.MexcResponse;
 
 import java.io.IOException;
 
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class ApiClient {
     @Getter
     private final MexcConfig config;
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final Retrofit retrofit;
 
     public ApiClient(MexcConfig config) {

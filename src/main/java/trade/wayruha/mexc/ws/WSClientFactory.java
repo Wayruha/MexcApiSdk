@@ -5,8 +5,9 @@ import lombok.Setter;
 import okhttp3.Request;
 import rx.annotations.Beta;
 import trade.wayruha.mexc.MexcConfig;
-import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.dto.AccountAssetBalance;
+import trade.wayruha.mexc.dto.MexcWSResponse;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.dto.OrderBook;
 import trade.wayruha.mexc.enums.Interval;
@@ -135,6 +136,10 @@ public class WSClientFactory {
      *
      * @implNote Use Deal.class to map response
      */
+    public WebSocketClient<AccountAssetBalance> userAccountAssetsSubscription( WebSocketCallback<MexcWSResponse<AccountAssetBalance>> callback) {
+        return new AutoRenewalPrivateWSClient<>(Set.of(USER_ACCOUNT_ASSETS_CHANNEL_FORMAT), callback, AccountAssetBalance.class, apiClient, objectMapper);
+    }
+
     @Beta
     public <T> WebSocketClient<T> userMarginRiskRateSubscription(Set<String> symbols, WebSocketCallback<MexcWSResponse<T>> callback, Class<T> type) {
         final Set<String> channels = symbols.stream()

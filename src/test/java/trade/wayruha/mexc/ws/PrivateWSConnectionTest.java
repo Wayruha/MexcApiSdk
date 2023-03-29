@@ -22,8 +22,6 @@ public class PrivateWSConnectionTest {
     final AtomicInteger wsResponseCounter = new AtomicInteger();
     final PrivateWSSubscriptionService privateAPI = new PrivateWSSubscriptionService(apiClient);
 
-
-
     @Test
     public void test_userSpotAccountTrade() {
         final String listenKey = privateAPI.createListenKey();

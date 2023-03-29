@@ -1,4 +1,4 @@
-package trade.wayruha.mexc;
+package trade.wayruha.mexc.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class MexcWSResponse<T> {
     @JsonProperty("s")
     private String symbol;
     @JsonProperty("t")
-    private long timestamp;
+    private Long timestamp;
 
     public String toStringShort() {
         return "MexcWSResponse_Short{" +
