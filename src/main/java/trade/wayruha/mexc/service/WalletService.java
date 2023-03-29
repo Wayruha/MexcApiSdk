@@ -1,13 +1,14 @@
 package trade.wayruha.mexc.service;
 
 import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.dto.AccountInfo;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.service.endpoint.WalletAPI;
 
 import java.util.List;
 
 public class WalletService extends ServiceBase {
-    private WalletAPI api;
+    private final WalletAPI api;
 
     public WalletService(MexcConfig config) {
         super(config);
@@ -21,5 +22,9 @@ public class WalletService extends ServiceBase {
     public List<Order> getAllOrders(String symbol, Integer limit, Long startTime, Long endTime) {
         return client.executeSync(api.getOrders(symbol, limit, startTime, endTime)).getData();
 
+    }
+
+    public AccountInfo getUserAccountInfo() {
+        return client.executeSync(api.getAccountInfo()).getData();
     }
 }

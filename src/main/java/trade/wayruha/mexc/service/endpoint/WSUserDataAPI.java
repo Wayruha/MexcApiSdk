@@ -9,6 +9,7 @@ public interface WSUserDataAPI {
     @POST("api/v3/userDataStream")
     @Headers(Constants.ENDPOINT_SECURITY_SIGNED_HEADER)
     Call<ListenKey> createListenKey();
+//    Call<ListenKey> createListenKey(@Query("timestamp") Long timestamp);
 
     @PUT("api/v3/userDataStream")
     @Headers(Constants.ENDPOINT_SECURITY_SIGNED_HEADER)

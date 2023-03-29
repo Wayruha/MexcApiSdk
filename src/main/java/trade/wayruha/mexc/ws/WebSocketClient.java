@@ -12,8 +12,8 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import trade.wayruha.mexc.MexcConfig;
-import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.dto.MexcWSResponse;
 import trade.wayruha.mexc.enums.WSState;
 import trade.wayruha.mexc.utils.IdGenerator;
 
@@ -162,7 +162,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     private void closeOnError(Throwable ex) {
-        log.error("{} [Connection error] Connection is closing due to error: {}", logPrefix, ex != null ? ex.getMessage() : null);
+        log.warn("{} [Connection error] Connection is closing due to error: {}", logPrefix, ex != null ? ex.getMessage() : null);
         close();
         state = WSState.CLOSED_ON_ERROR;
     }
