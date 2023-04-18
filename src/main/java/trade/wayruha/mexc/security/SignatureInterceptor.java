@@ -4,8 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
-import trade.wayruha.mexc.Constants;
-import trade.wayruha.mexc.security.SignatureUtil;
+import trade.wayruha.mexc.constant.Constants;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

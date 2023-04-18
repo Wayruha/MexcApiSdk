@@ -1,8 +1,11 @@
 package trade.wayruha.mexc.service.endpoint;
 
 import retrofit2.Call;
-import retrofit2.http.*;
-import trade.wayruha.mexc.Constants;
+import retrofit2.http.Body;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
+import trade.wayruha.mexc.constant.Constants;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.dto.PostOrder;
 

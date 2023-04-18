@@ -2,7 +2,7 @@ package trade.wayruha.mexc.service.endpoint;
 
 import retrofit2.Call;
 import retrofit2.http.*;
-import trade.wayruha.mexc.Constants;
+import trade.wayruha.mexc.constant.Constants;
 import trade.wayruha.mexc.dto.ListenKey;
 
 public interface WSUserDataAPI {

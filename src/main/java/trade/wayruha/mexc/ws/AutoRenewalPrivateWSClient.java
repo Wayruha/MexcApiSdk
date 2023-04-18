@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
-import trade.wayruha.mexc.dto.MexcWSResponse;
 import trade.wayruha.mexc.service.PrivateWSSubscriptionService;
 
 import java.util.Set;
@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
-import static trade.wayruha.mexc.Constants.LISTEN_KEY_QUERY_PARAM;
+import static trade.wayruha.mexc.constant.Constants.LISTEN_KEY_QUERY_PARAM;
 import static trade.wayruha.mexc.constant.GlobalParams.*;
 
 /**

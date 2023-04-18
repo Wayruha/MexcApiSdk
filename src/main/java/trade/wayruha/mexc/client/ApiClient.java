@@ -11,9 +11,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import trade.wayruha.mexc.MexcApiException;
 import trade.wayruha.mexc.MexcConfig;
+import trade.wayruha.mexc.MexcResponse;
 import trade.wayruha.mexc.client.helper.HttpClientBuilder;
 import trade.wayruha.mexc.client.helper.RetrofitBuilder;
-import trade.wayruha.mexc.dto.MexcResponse;
 
 import java.io.IOException;
 
@@ -46,7 +46,7 @@ public class ApiClient {
                 return new MexcResponse<>(response.code(), body);
             } else {
                 log.error("Request failed: {} ", response);
-                throw new MexcApiException(response.code(), response.message());
+                throw new MexcApiException(response.code(), response.errorBody().string());
             }
         } catch (IOException e) {
             log.error("Request failed: {} ", call.request(), e);

@@ -16,12 +16,19 @@ public class WalletService extends ServiceBase {
     }
 
     public List<Order> getAllOrders(String symbol) {
-        return getAllOrders(symbol, null, null, null);
+        return this.getAllOrders(symbol, null, null, null);
     }
 
     public List<Order> getAllOrders(String symbol, Integer limit, Long startTime, Long endTime) {
         return client.executeSync(api.getOrders(symbol, limit, startTime, endTime)).getData();
+    }
 
+    public Order getOrder(String symbol, String orderId) {
+        return this.getOrder(symbol, orderId, null, null, null);
+    }
+
+    public Order getOrder(String symbol, String orderId, String origClientOrderId, Long recvWindow, Long timestamp) {
+        return client.executeSync(api.getOrder(symbol, orderId, origClientOrderId, recvWindow, timestamp)).getData();
     }
 
     public AccountInfo getUserAccountInfo() {

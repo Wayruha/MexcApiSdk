@@ -18,7 +18,7 @@ public class TradeServiceTest {
 
     @Test
     public void test_newTestOrder() {
-        final Order order = service.testNewOrder(makeOrder());
+        final Order order = service.createNewTestOrder(makeOrder());
         Assert.assertNotNull(order);
     }
 

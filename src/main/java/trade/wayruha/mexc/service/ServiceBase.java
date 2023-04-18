@@ -1,8 +1,8 @@
 package trade.wayruha.mexc.service;
 
-import trade.wayruha.mexc.Constants;
 import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.constant.Constants;
 
 public abstract class ServiceBase {
     protected final ApiClient client;

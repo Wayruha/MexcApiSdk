@@ -4,12 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TickerPrice {
-    @JsonProperty("symbol")
-    private String pairSymbol;
-    private BigDecimal price;
+public class Trades {
+
+    @JsonProperty("deals")
+    List<Trade> tradeList;
+
+    private String symbol;
+
+    private Long updateTimestamp;
 }

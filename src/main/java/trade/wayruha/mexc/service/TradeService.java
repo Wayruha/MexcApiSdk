@@ -13,11 +13,11 @@ public class TradeService extends ServiceBase {
         this.api = createService(TradeAPI.class);
     }
 
-    public Order testNewOrder(PostOrder order) {
+    public Order createNewTestOrder(PostOrder order) {
         return client.executeSync(api.testNewOrder(order, null, null)).getData();
     }
 
-    public Order newOrder(PostOrder order) {
+    public Order createNewOrder(PostOrder order) {
         return client.executeSync(api.newOrder(order, null, null)).getData();
     }
 }

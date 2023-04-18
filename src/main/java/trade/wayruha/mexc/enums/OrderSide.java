@@ -26,4 +26,9 @@ public enum OrderSide {
         return Arrays.stream(OrderSide.values()).parallel().filter(s-> s.getAliasNumber() == aliasNumber)
                 .findFirst().orElse(null);
     }
+
+    public static OrderSide findByName(String name){
+        return Arrays.stream(OrderSide.values()).parallel().filter(s-> s.name().equals(name))
+                .findFirst().orElse(null);
+    }
 }

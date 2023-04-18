@@ -9,6 +9,7 @@ public class GlobalParams {
 
     public static int WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION = 30;
     public static int WEB_SOCKET_RECONNECTION_DELAY_MS = 10_000;
+    public static int WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC = 55;
     public static int WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN = 45;
     public static int WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN = 23 * 60;
 

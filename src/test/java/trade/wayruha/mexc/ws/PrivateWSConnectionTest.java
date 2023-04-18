@@ -5,6 +5,7 @@ import okhttp3.Response;
 import org.junit.Test;
 import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.client.ApiClient;
+import trade.wayruha.mexc.constant.GlobalParams;
 import trade.wayruha.mexc.service.PrivateWSSubscriptionService;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,11 +24,27 @@ public class PrivateWSConnectionTest {
     final PrivateWSSubscriptionService privateAPI = new PrivateWSSubscriptionService(apiClient);
 
     @Test
-    public void test_userSpotAccountTrade() {
-        final String listenKey = privateAPI.createListenKey();
+    public void test_userSpotAccountOrder() {
         final Callback callback = new Callback();
-        final WebSocketClient ws = factory.userSpotTradesSubscription(listenKey, callback);
-        sleep(10_000);
+        final WebSocketClient ws = factory.userSpotOrdersSubscription(callback);
+        sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
+        assertTrue(wsOpenCounter.get() > 0);
+        assertTrue(wsResponseCounter.get() > 0);
+    }
+
+    @Test
+    public void test_userAccountAssetsChange() {
+        final Callback callback = new Callback();
+        final WebSocketClient ws = factory.userAccountAssetsSubscription(callback);
+        sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
+        assertTrue(wsOpenCounter.get() > 0);
+        assertTrue(wsResponseCounter.get() > 0);
+    }
+    @Test
+    public void test_userSpotDealsSubscription() {
+        final Callback callback = new Callback();
+        final WebSocketClient ws = factory.userSpotDealsSubscription(callback);
+        sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
         assertTrue(wsOpenCounter.get() > 0);
         assertTrue(wsResponseCounter.get() > 0);
     }

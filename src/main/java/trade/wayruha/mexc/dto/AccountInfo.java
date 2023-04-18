@@ -1,5 +1,6 @@
 package trade.wayruha.mexc.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountInfo {
     private Integer makerCommission;
     private Integer takerCommission;

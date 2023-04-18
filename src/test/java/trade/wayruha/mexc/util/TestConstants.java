@@ -8,4 +8,5 @@ public class TestConstants {
 
     public static final String BTC_USD_PAIR_SYMBOL = "BTCUSDT";
     public static final String ETH_USD_PAIR_SYMBOL = "ETHUSDT";
+    public static final String UNUSED_PAIR_SYMBOL = "FWCUSDT";
 }
