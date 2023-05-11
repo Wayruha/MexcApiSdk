@@ -11,7 +11,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
