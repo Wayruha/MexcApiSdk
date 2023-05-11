@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Objects.isNull;
 import static trade.wayruha.mexc.constant.GlobalParams.*;
@@ -47,6 +48,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     private WSState state;
     private WebSocket webSocket;
     private long lastReceivedTime;
+    private final AtomicInteger reconnectAttemptNum = new AtomicInteger(0);
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledPingTask;
 
@@ -179,9 +181,17 @@ public class WebSocketClient<T> extends WebSocketListener {
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        super.onFailure(webSocket, t, response);
-        closeOnError(t);
-        callback.onFailure(t, response);
+        log.warn("{} [Connection error] Connection was interrupted due to error on webSocket: {}, cause {}, response {}", logPrefix,
+                 webSocket, t.getMessage(), response);
+        var attemptNum = reconnectAttemptNum.get();
+        if(attemptNum < WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER) {
+            reconnectAttemptNum.set(++attemptNum);
+            reConnect();
+        }else {
+            super.onFailure(webSocket, t, response);
+            closeOnError(t);
+            callback.onFailure(t, response);
+        }
     }
 
     public long getLastReceivedTime() {
