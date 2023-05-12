@@ -25,7 +25,7 @@ public class OrderBook {
     @JsonProperty("timestamp")
     private long updateTimestamp;
     private long lastUpdateId;
-
+  
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
