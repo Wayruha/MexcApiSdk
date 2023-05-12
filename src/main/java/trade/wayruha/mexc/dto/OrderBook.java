@@ -22,9 +22,10 @@ public class OrderBook {
     private String eventType;
     @JsonProperty("r")
     private long version;
-    private long timestamp;
+    @JsonProperty("timestamp")
+    private long updateTimestamp;
     private long lastUpdateId;
-
+  
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
