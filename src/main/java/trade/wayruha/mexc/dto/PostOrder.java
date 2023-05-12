@@ -17,6 +17,8 @@ public class PostOrder {
     private BigDecimal quoteOrderQty;
     private BigDecimal price;
     private String newClientOrderId;
+    private String clientOrderId;
+    private String orderId;
 
     /**
      * validate if all necessary qty and price params are passed based on OrderType

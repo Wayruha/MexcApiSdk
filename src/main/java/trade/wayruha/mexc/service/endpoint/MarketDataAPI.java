@@ -5,16 +5,22 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import trade.wayruha.mexc.dto.ExchangeInfo;
+import trade.wayruha.mexc.dto.OrderBook;
 import trade.wayruha.mexc.dto.TickerPrice;
 
 import java.util.List;
 
+import static trade.wayruha.mexc.constant.ApiEndpoints.SYMBOL_ORDER_BOOK_API_PATH;
 import static trade.wayruha.mexc.constant.ApiEndpoints.SYMBOL_PRICE_TICKER_API_PATH;
 
 public interface MarketDataAPI {
 
     @GET("api/v3/exchangeInfo")
     Call<ExchangeInfo> getExchangeInfo();
+
+    @GET(SYMBOL_ORDER_BOOK_API_PATH)
+    Call<OrderBook> getOrderBookInfo(@NotNull @Query("symbol") String pairSymbol,
+                                     @NotNull @Query("limit") Integer limit);
 
     /** If the symbol is not sent, all symbols will be returned in an array.*/
     @GET(SYMBOL_PRICE_TICKER_API_PATH)
