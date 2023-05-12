@@ -26,15 +26,11 @@ public class TradeServiceTest {
     }
 
     private static PostOrder makeOrder() {
-        return PostOrder.builder() // todo delte
+        return PostOrder.builder()
                 .symbol(BTC_USD_PAIR_SYMBOL)
                 .side(OrderSide.BUY).type(OrderType.MARKET)
                 .quoteOrderQty(BigDecimal.TEN)
                 .build();
-//        return PostOrder.builder()
-//                .symbol("BLUESUSDT")
-//                .orderId("341bfb3f85c34139847cf894f9f0a5c0")
-//                .build();
     }
 
     @Test
