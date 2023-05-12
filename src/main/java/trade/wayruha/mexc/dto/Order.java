@@ -3,7 +3,7 @@ package trade.wayruha.mexc.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.*;
 import trade.wayruha.mexc.enums.*;
 
 import java.math.BigDecimal;
@@ -11,7 +11,14 @@ import java.math.BigDecimal;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-@Data
+
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Order {
 
@@ -106,13 +113,16 @@ public class Order {
     @JsonProperty("commissionAsset")
     private String commissionAssetSymbol;
 
+    @JsonProperty("commission")
+    private BigDecimal commissionAmount;
+
     @JsonAlias({"m"})
     private Boolean isMaker;
 
     private TimeInForce timeInForce;
 
     @JsonProperty("time")
-    @JsonAlias({"O", "createTime"})
+    @JsonAlias({"O", "createTime", "transactTime"})
     private Long createTimestamp;
 
     @JsonProperty("updateTime")

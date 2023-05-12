@@ -17,6 +17,9 @@ import trade.wayruha.mexc.client.helper.RetrofitBuilder;
 
 import java.io.IOException;
 
+import static java.util.Objects.nonNull;
+import static trade.wayruha.mexc.constant.Messages.API_CLIENT_ERROR_MESSAGE_PARSE_EXCEPTION;
+
 @Slf4j
 public class ApiClient {
     @Getter
@@ -39,17 +42,18 @@ public class ApiClient {
     }
 
     public <T> MexcResponse<T> executeSync(Call<T> call) {
+        String rawRequestData = call.request().toString();
         try {
             final Response<T> response = call.execute();
             final T body = response.body();
             if (response.isSuccessful()) {
                 return new MexcResponse<>(response.code(), body);
-            } else {
-                log.error("Request failed: {} ", response);
-                throw new MexcApiException(response.code(), response.errorBody().string());
             }
+            String errorMessage = nonNull(response.errorBody()) ? response.errorBody().string() : API_CLIENT_ERROR_MESSAGE_PARSE_EXCEPTION;
+            log.error("Request failed. Request data: {}. Response error message: {} ", rawRequestData, errorMessage);
+            throw new MexcApiException(response.code(), errorMessage);
         } catch (IOException e) {
-            log.error("Request failed: {} ", call.request(), e);
+            log.error("Request failed. Request data: {},  response: {} ", rawRequestData, call.request(), e);
             throw new MexcApiException(e.getMessage(), e);
         }
     }

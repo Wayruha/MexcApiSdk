@@ -38,6 +38,7 @@ public class WSClientFactory {
     /**
      * Subscription on Partial Book Depth Stream
      *
+     * @param orderBookDepth Valid are 5, 10, or 20.
      * @return OrderBook with Top bids and asks for specified limit
      */
     public WebSocketClient<OrderBook> orderBookSubscription(Set<String> symbols, OrderBookDepth orderBookDepth,
@@ -77,6 +78,7 @@ public class WSClientFactory {
     /**
      * Subscription on Diff.Depth Stream
      * If the quantity is 0, it means that the order of the price has been cancel or traded,remove the price level.
+     * Top bids and asks,
      *
      * @return OrderBook with last updates of placed orders
      */
@@ -103,6 +105,7 @@ public class WSClientFactory {
     }
 
     //region User WebSocket methods
+
     /**
      * Subscription on Spot Account (Limit/Market) Orders Stream
      */

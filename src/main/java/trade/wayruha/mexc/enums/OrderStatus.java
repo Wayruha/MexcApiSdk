@@ -12,11 +12,16 @@ public enum OrderStatus {
     FILLED(2),
     PARTIALLY_FILLED(3),
     CANCELED(4),
-    PARTIALLY_CANCELED(5);
+    PARTIALLY_CANCELED(5),
+    ERROR(999);
     private final int aliasNumber;
 
     public static OrderStatus findByAlias(int aliasNumber){
         return Arrays.stream(OrderStatus.values()).parallel().filter(s-> s.getAliasNumber() == aliasNumber)
                 .findFirst().orElse(null);
+    }
+
+    public boolean isFinished(){
+        return this != NEW && this != PARTIALLY_FILLED;
     }
 }
