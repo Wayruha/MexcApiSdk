@@ -1,38 +1,55 @@
 package trade.wayruha.mexc;
 
 import lombok.Data;
-import trade.wayruha.mexc.constant.APIConstants;
+import trade.wayruha.mexc.constant.GlobalParams;
+
+import static java.util.Objects.nonNull;
 
 @Data
 public class MexcConfig {
     public static final String DEFAULT_HTTP_HOST = "https://api.mexc.com/";
     public static final String DEFAULT_WS_HOST = "wss://wbs.mexc.com/ws";
 
-    private String endpoint;
     private String apiKey;
     private String apiSecret;
     private String passphrase;
-    private String httpHost = DEFAULT_HTTP_HOST;
-    private String webSocketHost = DEFAULT_WS_HOST;
+    private String httpHost;
+    private String webSocketHost;
+    private boolean webSocketReconnectAlways;
+    private int webSocketMaxReconnectAttemptNumber;
+    private int webSocketChannelKeepAlivePeriodSec;
 
     public MexcConfig() {
-        this(DEFAULT_HTTP_HOST, null, null);
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, "", "", null, null);
     }
 
     public MexcConfig(String apiKey, String apiSecret) {
-        this(DEFAULT_HTTP_HOST, apiKey, apiSecret);
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, null, null);
     }
 
-    public MexcConfig(String endpoint, String apiKey, String apiSecret) {
+    public MexcConfig(String httpHost, String webSocketHost, String apiKey, String apiSecret) {
+        this(httpHost, webSocketHost, apiKey, apiSecret, null, null);
+    }
+
+    public MexcConfig(String apiKey, String apiSecret, Boolean webSocketReconnectAlways, Integer webSocketMaxReconnectAttemptNumber) {
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, webSocketReconnectAlways, webSocketMaxReconnectAttemptNumber);
+    }
+
+    public MexcConfig(String httpHost, String webSocketHost, String apiKey, String apiSecret,
+                      Boolean webSocketReconnectAlways, Integer webSocketMaxReconnectAttemptNumber) {
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
         this.passphrase = null;
-        this.endpoint = endpoint;
-        this.connectTimeout = APIConstants.TIMEOUT;
-        this.readTimeout = APIConstants.TIMEOUT;
-        this.writeTimeout = APIConstants.TIMEOUT;
+        this.httpHost = httpHost;
+        this.webSocketHost = webSocketHost;
+        this.connectTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
+        this.readTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
+        this.writeTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
         this.retryOnConnectionFailure = true;
         this.print = false;
+        this.webSocketReconnectAlways = nonNull(webSocketReconnectAlways) ? webSocketReconnectAlways : false;
+        this.webSocketMaxReconnectAttemptNumber = nonNull(webSocketMaxReconnectAttemptNumber) ? webSocketMaxReconnectAttemptNumber : GlobalParams.WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER;
+        this.webSocketChannelKeepAlivePeriodSec = GlobalParams.WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC;
     }
 
     /**

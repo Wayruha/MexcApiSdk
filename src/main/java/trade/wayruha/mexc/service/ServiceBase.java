@@ -2,11 +2,9 @@ package trade.wayruha.mexc.service;
 
 import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.client.ApiClient;
-import trade.wayruha.mexc.constant.Constants;
 
 public abstract class ServiceBase {
     protected final ApiClient client;
-    protected int receivingWindow = Constants.DEFAULT_RECEIVING_WINDOW;
 
     public ServiceBase(ApiClient client) {
         this.client = client;
@@ -23,5 +21,4 @@ public abstract class ServiceBase {
     protected long now() {
         return System.currentTimeMillis();
     }
-
 }

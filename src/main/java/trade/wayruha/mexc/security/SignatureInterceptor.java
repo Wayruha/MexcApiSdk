@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
-import trade.wayruha.mexc.constant.Constants;
+import trade.wayruha.mexc.constant.GlobalParams;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -33,8 +33,8 @@ public class SignatureInterceptor implements Interceptor {
         String method = origRequest.method();
         //check
         final Request.Builder newBuilder = origRequest.newBuilder();
-        final boolean isSigned = origRequest.header(Constants.ENDPOINT_SECURITY_SIGNED) != null;
-        newBuilder.removeHeader(Constants.ENDPOINT_SECURITY_SIGNED);
+        final boolean isSigned = origRequest.header(GlobalParams.ENDPOINT_SECURITY_SIGNED) != null;
+        newBuilder.removeHeader(GlobalParams.ENDPOINT_SECURITY_SIGNED);
         if (isSigned) {
             newBuilder.addHeader(HEADER_ACCESS_KEY, apiKey);
             final RequestBody origBody = origRequest.body();

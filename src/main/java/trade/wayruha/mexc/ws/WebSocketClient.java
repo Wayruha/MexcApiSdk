@@ -26,8 +26,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Objects.isNull;
-import static trade.wayruha.mexc.constant.GlobalParams.*;
+import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION;
+import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS;
 import static trade.wayruha.mexc.constant.Messages.WEBSOCKET_INTERRUPTED_EXCEPTION;
 
 @Slf4j
@@ -37,6 +37,8 @@ public class WebSocketClient<T> extends WebSocketListener {
     protected final WebSocketCallback<MexcWSResponse<T>> callback;
     @Getter
     protected final Set<String> channels;
+    @Getter
+    protected Set<String> canceledChannels;
     @Getter
     protected final int id;
     protected final ObjectMapper objectMapper;
@@ -48,15 +50,17 @@ public class WebSocketClient<T> extends WebSocketListener {
     private WSState state;
     private WebSocket webSocket;
     private long lastReceivedTime;
-    private final AtomicInteger reconnectAttemptNum = new AtomicInteger(0);
-    private ScheduledExecutorService scheduler;
+    private final AtomicInteger currentReconnectAttemptIndex = new AtomicInteger(0);
+    protected ScheduledExecutorService scheduler;
     private ScheduledFuture<?> scheduledPingTask;
 
     WebSocketClient(Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
-        this(buildRequestFromHost(apiClient.getConfig().getWebSocketHost()), channels, listener, type, apiClient, mapper);
+        this(buildRequestFromHost(apiClient.getConfig().getWebSocketHost()), channels, listener, type, apiClient,
+                mapper);
     }
 
-    WebSocketClient(Request connectionRequest, Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener, Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
+    WebSocketClient(Request connectionRequest, Set<String> channels, WebSocketCallback<MexcWSResponse<T>> listener,
+                    Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         this.id = IdGenerator.getNextId();
         this.logPrefix = "[ws-" + this.id + "]";
         this.channels = new HashSet<>();
@@ -66,49 +70,49 @@ public class WebSocketClient<T> extends WebSocketListener {
         this.config = apiClient.getConfig();
         this.objectMapper = mapper;
         this.connectionRequest = connectionRequest;
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         connect(channels);
     }
 
     protected void connect(Set<String> newChannels) {
         if (this.state != WSState.CONNECTED && this.state != WSState.CONNECTING) {
-            log.debug("{} Connecting...", logPrefix);
+            log.debug("{} Connecting to channels {} ...", logPrefix, newChannels);
             this.state = WSState.CONNECTING;
             this.webSocket = apiClient.createWebSocket(this.connectionRequest, this);
+            if (this.webSocket == null) {
+                log.error("Error connect {}", this.connectionRequest);
+            }
         } else {
-            log.warn("{} Already connected", logPrefix);
+            log.warn("{} Already connected to channels {}", logPrefix, channels);
         }
         if (!newChannels.isEmpty()) {
             this.subscribe(newChannels);
-            this.scheduledPingTask = this.getScheduler().scheduleAtFixedRate(new PingTask(newChannels),
-                    WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC, WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC, TimeUnit.SECONDS);
+            //create ping task for keep alive WS connection if no messages were produced be server
+            this.scheduledPingTask = scheduler.scheduleAtFixedRate(new PingTask(),
+                    this.config.getWebSocketChannelKeepAlivePeriodSec(), this.config.getWebSocketChannelKeepAlivePeriodSec(), TimeUnit.SECONDS);
         }
-    }
-    private ScheduledExecutorService getScheduler(){
-        if(isNull(this.scheduler)){
-            this.scheduler = Executors.newSingleThreadScheduledExecutor();
-        }
-        return this.scheduler;
+        currentReconnectAttemptIndex.set(0);//reset reconnection indexer due to successful connection
     }
 
-    public void send(String str) {
+    public void sendRequest(String request) {
         boolean result = false;
-        log.debug("{}:send() {}", logPrefix, str);
+        log.debug("{} Try to send request {}", logPrefix, request);
         if (webSocket != null) {
-            result = webSocket.send(str);
+            result = webSocket.send(request);
         }
         if (!result) {
-            log.error("{}: Failed to send message: {}", logPrefix, str);
+            log.error("{} Failed to send message: {}", logPrefix, request);
             closeOnError(null);
         }
     }
 
     @SneakyThrows
     public void subscribe(Collection<String> newChannels) {
-        if (this.channels.size() + newChannels.size() > WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION)
-            throw new IllegalArgumentException("Can't subscribe to more then " + WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION + "channels in single WS connection");
+        if (this.channels.size() + newChannels.size() > this.config.getWebSocketMaxReconnectAttemptNumber())
+            throw new IllegalArgumentException("Can't subscribe to more then " + WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION + " channels in single WS connection");
         final Message msg = new Message(Action.SUBSCRIPTION, newChannels);
         final String content = objectMapper.writeValueAsString(msg);
-        this.send(content);
+        this.sendRequest(content);
         this.channels.addAll(newChannels);
     }
 
@@ -116,38 +120,59 @@ public class WebSocketClient<T> extends WebSocketListener {
     public void ping(Collection<String> channels) {
         final Message msg = new Message(Action.PING, channels);
         final String content = objectMapper.writeValueAsString(msg);
-        this.send(content);
-        log.info("{} ping was send to channels {} ", logPrefix, channels);
+        this.sendRequest(content);
+        log.trace("{} Ping was send to channels {} ", logPrefix, channels);
     }
 
     @SneakyThrows
     public void unsubscribe(Collection<String> channels) {
         final Message msg = new Message(Action.UNSUBSCRIPTION, channels);
         final String content = objectMapper.writeValueAsString(msg);
-        send(content);
+        sendRequest(content);
         this.channels.removeAll(channels);
     }
 
     public void close() {
-        log.info("{} closing", logPrefix);
+        log.debug("{} Closing WS channels: {}", logPrefix, this.channels);
+        state = WSState.IDLE;
         if (webSocket != null) {
             webSocket.cancel();
             webSocket = null;
         }
-        state = WSState.IDLE;
         this.channels.clear();
         scheduledPingTask.cancel(false);
     }
 
-    public void reConnect() {
-        this.close();
-        this.connect(this.channels);
+    public boolean reConnect() {
+        var success = false;
+        this.canceledChannels = new HashSet<>();
+        this.canceledChannels.addAll(this.channels);
+        while (!success &&
+                (this.config.isWebSocketReconnectAlways() || currentReconnectAttemptIndex.incrementAndGet() < this.config.getWebSocketMaxReconnectAttemptNumber())) {
+            try {
+                log.debug("{} Try to reconnect to WebSocket channels: {}. Attempt #{}",
+                        logPrefix, this.canceledChannels, currentReconnectAttemptIndex.get());
+                this.close();
+                this.connect(this.canceledChannels);
+                success = true;
+                this.canceledChannels.clear();
+            } catch (Exception e) {
+                log.error("{} [Connection error] Error to reconnect {}", logPrefix, e.getMessage(), e);
+                try {
+                    Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);
+                } catch (InterruptedException ex) {
+                    log.error("{} [Connection error] Error to sleep until next reconnection attempt {}. Skip sleeping", logPrefix, ex.getMessage(), ex);
+                }
+            }
+        }
+        log.debug("{} Successfully reconnected to WebSocket channels: {}.", logPrefix, this.channels);
+        return success;
     }
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
         super.onOpen(webSocket, response);
-        log.debug("{} connected", log);
+        log.debug("{} onOpen WS event: Connected to channels {}", logPrefix, this.channels);
         state = WSState.CONNECTED;
         lastReceivedTime = System.currentTimeMillis();
         this.webSocket = webSocket;
@@ -158,7 +183,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     public void onMessage(WebSocket webSocket, String text) {
         super.onMessage(webSocket, text);
         lastReceivedTime = System.currentTimeMillis();
-        log.trace("{} onMessage: {}", logPrefix, text);
+        log.trace("{} onMessage WS event: {}", logPrefix, text);
         try {
             JavaType typeMap = objectMapper.getTypeFactory().constructParametricType(MexcWSResponse.class, type);
             MexcWSResponse<T> obj = objectMapper.readValue(text, typeMap);
@@ -171,23 +196,28 @@ public class WebSocketClient<T> extends WebSocketListener {
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
+        log.trace("{} onClosed WS event: {}, code: {}", logPrefix, reason, code);
         super.onClosed(webSocket, code, reason);
         if (state == WSState.CONNECTED || state == WSState.CONNECTING) {
             state = WSState.IDLE;
         }
-        log.debug("{} closed", logPrefix);
+        log.debug("{} Closed", logPrefix);
         callback.onClosed(code, reason);
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        log.warn("{} [Connection error] Connection was interrupted due to error on webSocket: {}, cause {}, response {}", logPrefix,
-                 webSocket, t.getMessage(), response);
-        var attemptNum = reconnectAttemptNum.get();
-        if(attemptNum < WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER) {
-            reconnectAttemptNum.set(++attemptNum);
-            reConnect();
-        }else {
+        if (state == WSState.IDLE) {
+            return;//this is a handled websocket closure. No failure event should be created.
+        }
+        log.warn("{} onFailure WS event cause: {}", logPrefix, t.getMessage());
+        if (this.reConnect()) {//try to reconnect
+            log.trace("{} [Connection error] Reconnection to WebSocket channels: {} was successfully.",
+                    logPrefix, this.channels); //reconnect was successful
+        } else {
+            log.warn("{} [Connection error] After {} attempts we couldn't reconnect to WebSocket for channels: {}.",
+                    logPrefix, this.config.getWebSocketMaxReconnectAttemptNumber(), this.canceledChannels);
+            this.canceledChannels.clear();
             super.onFailure(webSocket, t, response);
             closeOnError(t);
             callback.onFailure(t, response);
@@ -199,7 +229,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     private void closeOnError(Throwable ex) {
-        log.warn("{} [Connection error] Connection is closing due to error: {}", logPrefix,
+        log.warn("{} [Connection error] Connection will be closed due to error: {}", logPrefix,
                 ex != null ? ex.getMessage() : WEBSOCKET_INTERRUPTED_EXCEPTION);
         this.close();
         state = WSState.CLOSED_ON_ERROR;
@@ -219,19 +249,15 @@ public class WebSocketClient<T> extends WebSocketListener {
     enum Action {
         SUBSCRIPTION, UNSUBSCRIPTION, PING
     }
-   class PingTask implements Runnable {
-       private final Collection<String> existedChannels;
 
-       public PingTask(Collection<String> existedChannels) {
-           this.existedChannels = existedChannels;
-       }
+    class PingTask implements Runnable {
         @SneakyThrows
         @Override
         public void run() {
             try {
-                ping(existedChannels);
+                ping(channels);
             } catch (Exception ex) {
-                log.error("{} Re-subscription error. Try again in {} sec...", logPrefix, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
+                log.error("{} Ping error. Try to reconnect and send again in {} sec...", logPrefix, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
                 Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);
                 reConnect();
             }

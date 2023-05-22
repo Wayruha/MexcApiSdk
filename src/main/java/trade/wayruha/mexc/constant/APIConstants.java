@@ -8,11 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class APIConstants {
-
-    /**
-     * The default timeout is 30 seconds.
-     */
-    public static final long TIMEOUT = 1000 * 30;
     /**
      * All requests and responses are application/json content type and follow typical HTTP response status codes for success and failure.
      */
