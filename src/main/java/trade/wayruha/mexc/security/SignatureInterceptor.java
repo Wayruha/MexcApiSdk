@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 import java.time.Instant;
 
 /**
- * Copy-pasted from: https://github.com/mxcdevelop/mexc-api-demo/blob/main/Java/src/main/java/com/mexc/example/common/
+ * Copy-pasted from: <a href="https://github.com/mxcdevelop/mexc-api-demo/blob/main/Java/src/main/java/com/mexc/example/common/">Mexc official examples</a>
  */
 @Slf4j
 public class SignatureInterceptor implements Interceptor {
@@ -56,35 +56,6 @@ public class SignatureInterceptor implements Interceptor {
         }
         final Request request = newBuilder.build();
         return chain.proceed(request);
-        /*Request newRequest;
-        if ("GET".equals(method)) {
-            newRequest = createUrlSignRequest(origRequest);
-        } else if ("POST".equals(method) || "DELETE".equals(method)) {
-            RequestBody origBody = origRequest.body();
-            if (origBody != null) {
-                //support body params
-                newRequest = createBodySignRequest(origRequest, origBody, method);
-            } else {
-                //support query params
-                newRequest = createUrlSignRequest(origRequest);
-            }
-        } else {
-            return chain.proceed(origRequest);
-        }
-        return chain.proceed(newRequest);*/
-    }
-
-    private Request createBodySignRequest(Request origRequest, RequestBody origBody, String method) {
-        String params = encodeBody(origBody);
-        if ("POST".equals(method)) {
-            return origRequest.newBuilder()
-                    .addHeader(HEADER_ACCESS_KEY, apiKey)
-                    .post(RequestBody.create(MediaType.get("text/plain"), params)).build();
-        } else {
-            return origRequest.newBuilder()
-                    .addHeader(HEADER_ACCESS_KEY, apiKey)
-                    .delete(RequestBody.create(MediaType.get("text/plain"), params)).build();
-        }
     }
 
     private Request encodeUrl(Request request) {

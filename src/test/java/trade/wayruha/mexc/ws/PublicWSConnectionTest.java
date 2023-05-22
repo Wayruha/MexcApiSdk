@@ -36,7 +36,7 @@ public class PublicWSConnectionTest {
         final Callback callback = new Callback();
         final WebSocketClient ws = factory.tradesSubscription(symbols, callback);
         int keepAlivePeriodSec = (int)(WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC * 1.2); //+20%
-        sleep(keepAlivePeriodSec  * 1000);
+        sleep(keepAlivePeriodSec  * 1000L);
         assertTrue(wsOpenCounter.get() > 0);
         assertTrue(wsResponseCounter.get() > 2);
     }

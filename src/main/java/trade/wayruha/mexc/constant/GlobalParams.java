@@ -6,7 +6,6 @@ public class GlobalParams {
      */
     public static final String ENDPOINT_SECURITY_SIGNED = "API_SIGNED";
     public static final String ENDPOINT_SECURITY_SIGNED_HEADER = ENDPOINT_SECURITY_SIGNED + ": #";
-    public static final int DEFAULT_RECEIVING_WINDOW = 60_000;
     /**
      * The default timeout is 30 seconds.
      */

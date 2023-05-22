@@ -17,8 +17,4 @@ public abstract class ServiceBase {
     protected <T> T createService(Class<T> apiClass) {
         return client.createService(apiClass);
     }
-
-    protected long now() {
-        return System.currentTimeMillis();
-    }
 }
