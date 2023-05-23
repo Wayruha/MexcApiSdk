@@ -10,9 +10,8 @@ import trade.wayruha.mexc.enums.OrderBookDepth;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC;
+import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC;
 import static trade.wayruha.mexc.util.TestConstants.*;
 
 public class PublicWSConnectionTest {
@@ -32,14 +31,14 @@ public class PublicWSConnectionTest {
     }
 
     @Test
-    public void test_noTradesSubscriptionKeepUp() {
+    public void test_noTradesSubscriptionKeepUp() {//check if ping was send to WS and our WS connect stable
         final Set<String> symbols = Set.of(UNUSED_PAIR_SYMBOL);
         final Callback callback = new Callback();
         final WebSocketClient ws = factory.tradesSubscription(symbols, callback);
-        int keepAlivePeriodSec = (int)(WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC * 1.2); //+20%
-        sleep(keepAlivePeriodSec  * 1000);
+        int keepAlivePeriodSec = (int)(WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC * 1.2); //+20%
+        sleep(keepAlivePeriodSec  * 1000L);
         assertTrue(wsOpenCounter.get() > 0);
-        assertEquals(2, wsResponseCounter.get());
+        assertTrue(wsResponseCounter.get() > 2);
     }
 
     @Test
@@ -63,7 +62,7 @@ public class PublicWSConnectionTest {
     }
 
     @SneakyThrows
-    private static void sleep(int timeMs){
+    private static void sleep(long timeMs){
         Thread.sleep(timeMs);
     }
 

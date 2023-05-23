@@ -4,14 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import okio.Buffer;
 import org.jetbrains.annotations.NotNull;
-import trade.wayruha.mexc.constant.Constants;
+import trade.wayruha.mexc.constant.GlobalParams;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.Instant;
 
 /**
- * Copy-pasted from: https://github.com/mxcdevelop/mexc-api-demo/blob/main/Java/src/main/java/com/mexc/example/common/
+ * Copy-pasted from: <a href="https://github.com/mxcdevelop/mexc-api-demo/blob/main/Java/src/main/java/com/mexc/example/common/">Mexc official examples</a>
  */
 @Slf4j
 public class SignatureInterceptor implements Interceptor {
@@ -33,8 +33,8 @@ public class SignatureInterceptor implements Interceptor {
         String method = origRequest.method();
         //check
         final Request.Builder newBuilder = origRequest.newBuilder();
-        final boolean isSigned = origRequest.header(Constants.ENDPOINT_SECURITY_SIGNED) != null;
-        newBuilder.removeHeader(Constants.ENDPOINT_SECURITY_SIGNED);
+        final boolean isSigned = origRequest.header(GlobalParams.ENDPOINT_SECURITY_SIGNED) != null;
+        newBuilder.removeHeader(GlobalParams.ENDPOINT_SECURITY_SIGNED);
         if (isSigned) {
             newBuilder.addHeader(HEADER_ACCESS_KEY, apiKey);
             final RequestBody origBody = origRequest.body();
@@ -56,35 +56,6 @@ public class SignatureInterceptor implements Interceptor {
         }
         final Request request = newBuilder.build();
         return chain.proceed(request);
-        /*Request newRequest;
-        if ("GET".equals(method)) {
-            newRequest = createUrlSignRequest(origRequest);
-        } else if ("POST".equals(method) || "DELETE".equals(method)) {
-            RequestBody origBody = origRequest.body();
-            if (origBody != null) {
-                //support body params
-                newRequest = createBodySignRequest(origRequest, origBody, method);
-            } else {
-                //support query params
-                newRequest = createUrlSignRequest(origRequest);
-            }
-        } else {
-            return chain.proceed(origRequest);
-        }
-        return chain.proceed(newRequest);*/
-    }
-
-    private Request createBodySignRequest(Request origRequest, RequestBody origBody, String method) {
-        String params = encodeBody(origBody);
-        if ("POST".equals(method)) {
-            return origRequest.newBuilder()
-                    .addHeader(HEADER_ACCESS_KEY, apiKey)
-                    .post(RequestBody.create(MediaType.get("text/plain"), params)).build();
-        } else {
-            return origRequest.newBuilder()
-                    .addHeader(HEADER_ACCESS_KEY, apiKey)
-                    .delete(RequestBody.create(MediaType.get("text/plain"), params)).build();
-        }
     }
 
     private Request encodeUrl(Request request) {
