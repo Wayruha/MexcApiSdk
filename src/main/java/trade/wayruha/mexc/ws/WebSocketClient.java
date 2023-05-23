@@ -66,6 +66,7 @@ public class WebSocketClient<T> extends WebSocketListener {
         this.config = apiClient.getConfig();
         this.objectMapper = mapper;
         this.connectionRequest = connectionRequest;
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
         connect(channels);
     }
 
@@ -79,15 +80,9 @@ public class WebSocketClient<T> extends WebSocketListener {
         }
         if (!newChannels.isEmpty()) {
             this.subscribe(newChannels);
-            this.scheduledPingTask = this.getScheduler().scheduleAtFixedRate(new PingTask(newChannels),
+            this.scheduledPingTask = this.scheduler.scheduleAtFixedRate(new PingTask(newChannels),
                     WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC, WEB_SOCKET_KEEP_ALIVE_TOPIC_PERIOD_SEC, TimeUnit.SECONDS);
         }
-    }
-    private ScheduledExecutorService getScheduler(){
-        if(isNull(this.scheduler)){
-            this.scheduler = Executors.newSingleThreadScheduledExecutor();
-        }
-        return this.scheduler;
     }
 
     public void send(String str) {
@@ -117,7 +112,7 @@ public class WebSocketClient<T> extends WebSocketListener {
         final Message msg = new Message(Action.PING, channels);
         final String content = objectMapper.writeValueAsString(msg);
         this.send(content);
-        log.info("{} ping was send to channels {} ", logPrefix, channels);
+        log.debug("{} ping was send to channels {} ", logPrefix, channels);
     }
 
     @SneakyThrows
@@ -129,7 +124,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     public void close() {
-        log.info("{} closing", logPrefix);
+        log.debug("{} closing", logPrefix);
         if (webSocket != null) {
             webSocket.cancel();
             webSocket = null;

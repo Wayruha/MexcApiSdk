@@ -10,22 +10,21 @@ import trade.wayruha.mexc.dto.TickerPrice;
 
 import java.util.List;
 
-import static trade.wayruha.mexc.constant.ApiEndpoints.SYMBOL_ORDER_BOOK_API_PATH;
-import static trade.wayruha.mexc.constant.ApiEndpoints.SYMBOL_PRICE_TICKER_API_PATH;
-
 public interface MarketDataAPI {
 
     @GET("api/v3/exchangeInfo")
     Call<ExchangeInfo> getExchangeInfo();
 
-    @GET(SYMBOL_ORDER_BOOK_API_PATH)
+    @GET("/api/v3/depth")
     Call<OrderBook> getOrderBookInfo(@NotNull @Query("symbol") String pairSymbol,
                                      @NotNull @Query("limit") Integer limit);
 
-    /** If the symbol is not sent, all symbols will be returned in an array.*/
-    @GET(SYMBOL_PRICE_TICKER_API_PATH)
+    /**
+     * If the symbol is not sent, all symbols will be returned in an array.
+     */
+    @GET("/api/v3/ticker/price")
     Call<TickerPrice> getTickerPriceInfo(@NotNull @Query("symbol") String pairSymbol);
 
-    @GET(SYMBOL_PRICE_TICKER_API_PATH)
+    @GET("/api/v3/ticker/price")
     Call<List<TickerPrice>> getTickerPriceInfo();
 }

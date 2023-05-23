@@ -1,21 +1,6 @@
 package trade.wayruha.mexc.constant;
 
 public class ApiEndpoints {
-
-    //Market Data Endpoints
-    public static final String SYMBOL_ORDER_BOOK_API_PATH = "/api/v3/depth";
-
-    /**
-     * If the symbol is not sent, all symbols will be returned in an array.
-     */
-    public static final String SYMBOL_PRICE_TICKER_API_PATH = "/api/v3/ticker/price";
-
-    /**
-     * If the symbol is not sent, all symbols will be returned in an array.
-     */
-    public static final String USER_ACCOUNT_DATA_API_PATH = "/api/v3/account";
-
-
     //Public WebSocket streams endpoints
     /**
      * Partial Book Depth Streams.

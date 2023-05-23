@@ -24,11 +24,13 @@ public class MexcWSResponse<T> {
     @JsonProperty("t")
     private Long timestamp;
 
-    public String toStringShort() {
-        return "MexcWSResponse_Short{" +
+    @Override
+    public String toString() {
+        return "MexcWSResponse{" +
                 "id='" + id + '\'' +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
+                ", data=" + data +
                 ", channel='" + channel + '\'' +
                 ", symbol='" + symbol + '\'' +
                 ", timestamp=" + timestamp +
