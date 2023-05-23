@@ -2,20 +2,17 @@ package trade.wayruha.mexc.ws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
-import okhttp3.Request;
 import rx.annotations.Beta;
 import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.MexcWSResponse;
 import trade.wayruha.mexc.client.ApiClient;
-import trade.wayruha.mexc.dto.Order;
-import trade.wayruha.mexc.dto.OrderBook;
+import trade.wayruha.mexc.dto.*;
 import trade.wayruha.mexc.enums.Interval;
 import trade.wayruha.mexc.enums.OrderBookDepth;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static trade.wayruha.mexc.Constants.LISTEN_KEY_QUERY_PARAM;
 import static trade.wayruha.mexc.constant.ApiEndpoints.*;
 
 @SuppressWarnings("unused")
@@ -41,10 +38,11 @@ public class WSClientFactory {
     /**
      * Subscription on Partial Book Depth Stream
      *
+     * @param orderBookDepth Valid are 5, 10, or 20.
      * @return OrderBook with Top bids and asks for specified limit
      */
     public WebSocketClient<OrderBook> orderBookSubscription(Set<String> symbols, OrderBookDepth orderBookDepth,
-                                                                      WebSocketCallback<MexcWSResponse<OrderBook>> callback) {
+                                                            WebSocketCallback<MexcWSResponse<OrderBook>> callback) {
         final Set<String> channels = symbols.stream()
                 .map(sym -> String.format(PARTIAL_BOOK_CHANNEL_FORMAT, sym, orderBookDepth.getDepth()))
                 .collect(Collectors.toSet());
@@ -55,14 +53,12 @@ public class WSClientFactory {
      * Subscription on Trade Streams, that push raw trade information.
      *
      * @return finished Deals with a unique buyer and seller.
-     * @implNote Use Deal.class to map response
      */
-    @Beta
-    public <T> WebSocketClient<T> tradesSubscription(Set<String> symbols, WebSocketCallback<MexcWSResponse<T>> callback, Class<T> type) {
+    public WebSocketClient<Trades> tradesSubscription(Set<String> symbols, WebSocketCallback<MexcWSResponse<Trades>> callback) {
         final Set<String> channels = symbols.stream()
                 .map(sym -> String.format(TRADE_CHANNEL_FORMAT, sym))
                 .collect(Collectors.toSet());
-        return new WebSocketClient<>(channels, callback, type, apiClient, objectMapper);
+        return new WebSocketClient<>(channels, callback, Trades.class, apiClient, objectMapper);
     }
 
     /**
@@ -82,6 +78,7 @@ public class WSClientFactory {
     /**
      * Subscription on Diff.Depth Stream
      * If the quantity is 0, it means that the order of the price has been cancel or traded,remove the price level.
+     * Top bids and asks,
      *
      * @return OrderBook with last updates of placed orders
      */
@@ -107,17 +104,13 @@ public class WSClientFactory {
         return new WebSocketClient<>(channels, callback, type, apiClient, objectMapper);
     }
 
-
-    //User WebSocket methods
+    //region User WebSocket methods
 
     /**
      * Subscription on Spot Account (Limit/Market) Orders Stream
-     *
-     * @implNote Use Deal.class to map response
      */
-    @Beta
-    public <T> WebSocketClient<T> userSpotDealsSubscription(WebSocketCallback<MexcWSResponse<T>> callback, Class<T> type) {
-        return new AutoRenewalPrivateWSClient<>(Set.of(USER_SPOT_DEALS_CHANNEL_FORMAT), callback, type, apiClient, objectMapper);
+    public WebSocketClient<Trade> userSpotDealsSubscription(WebSocketCallback<MexcWSResponse<Trade>> callback) {
+        return new AutoRenewalPrivateWSClient<>(Set.of(USER_SPOT_DEALS_CHANNEL_FORMAT), callback, Trade.class, apiClient, objectMapper);
     }
 
     /**
@@ -135,6 +128,10 @@ public class WSClientFactory {
      *
      * @implNote Use Deal.class to map response
      */
+    public WebSocketClient<AccountAssetBalance> userAccountAssetsSubscription(WebSocketCallback<MexcWSResponse<AccountAssetBalance>> callback) {
+        return new AutoRenewalPrivateWSClient<>(Set.of(USER_ACCOUNT_ASSETS_CHANNEL_FORMAT), callback, AccountAssetBalance.class, apiClient, objectMapper);
+    }
+
     @Beta
     public <T> WebSocketClient<T> userMarginRiskRateSubscription(Set<String> symbols, WebSocketCallback<MexcWSResponse<T>> callback, Class<T> type) {
         final Set<String> channels = symbols.stream()
@@ -144,28 +141,12 @@ public class WSClientFactory {
     }
 
     /**
-     * Subscription on spot (Limit/Market) orders stream for your Account. Stream push all updates to users orders on a symbol
-     */
-    public WebSocketClient<Order> userSpotTradesSubscription(String listenKey, WebSocketCallback<MexcWSResponse<Order>> callback) {
-        final Request request = new Request.Builder()
-                .url(config.getWebSocketHost() + "?" + LISTEN_KEY_QUERY_PARAM + "=" + listenKey)
-                .build();
-        return userSpotTradesSubscription(request, callback);
-    }
-
-    /**
      * Subscription on spot (Limit/Market) orders stream for your Account.
      * Stream push all updates to users orders on a symbol
      */
-    public WebSocketClient<Order> userSpotTradesSubscription(WebSocketCallback<MexcWSResponse<Order>> callback) {
+    public WebSocketClient<Order> userSpotOrdersSubscription(WebSocketCallback<MexcWSResponse<Order>> callback) {
         return new AutoRenewalPrivateWSClient<>(Set.of(USER_SPOT_ORDERS_CHANNEL_FORMAT), callback, Order.class, apiClient, objectMapper);
     }
+    //endregion
 
-
-    /**
-     * Subscription on spot (Limit/Market) orders stream for your Account. Stream push all updates to users orders on a symbol
-     */
-    public  WebSocketClient<Order> userSpotTradesSubscription(Request connectionRequest, WebSocketCallback<MexcWSResponse<Order>> callback) {
-        return new WebSocketClient<>(connectionRequest, Set.of(USER_SPOT_ORDERS_CHANNEL_FORMAT), callback, Order.class, apiClient, objectMapper);
-    }
 }

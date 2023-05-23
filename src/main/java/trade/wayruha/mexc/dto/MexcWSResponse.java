@@ -1,4 +1,4 @@
-package trade.wayruha.mexc;
+package trade.wayruha.mexc.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

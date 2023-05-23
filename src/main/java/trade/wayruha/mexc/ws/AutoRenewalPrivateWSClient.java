@@ -15,7 +15,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
-import static trade.wayruha.mexc.Constants.LISTEN_KEY_QUERY_PARAM;
+import static trade.wayruha.mexc.constant.Constants.LISTEN_KEY_QUERY_PARAM;
 import static trade.wayruha.mexc.constant.GlobalParams.*;
 
 /**

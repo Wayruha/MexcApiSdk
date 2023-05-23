@@ -2,6 +2,20 @@ package trade.wayruha.mexc.constant;
 
 public class ApiEndpoints {
 
+    //Market Data Endpoints
+    public static final String SYMBOL_ORDER_BOOK_API_PATH = "/api/v3/depth";
+
+    /**
+     * If the symbol is not sent, all symbols will be returned in an array.
+     */
+    public static final String SYMBOL_PRICE_TICKER_API_PATH = "/api/v3/ticker/price";
+
+    /**
+     * If the symbol is not sent, all symbols will be returned in an array.
+     */
+    public static final String USER_ACCOUNT_DATA_API_PATH = "/api/v3/account";
+
+
     //Public WebSocket streams endpoints
     /**
      * Partial Book Depth Streams.
@@ -31,6 +45,7 @@ public class ApiEndpoints {
      */
     public static final String DIFF_DEPTH_CHANNEL_FORMAT = "spot@public.increase.depth.v3.api@%s";
 
+
     /**
      * Individual Symbol Book Ticker Stream
      *
@@ -39,8 +54,13 @@ public class ApiEndpoints {
     public static final String INDIVIDUAL_SYMBOL_BOOK_CHANNEL_FORMAT = "spot@public.bookTicker.v3.api@%s";
 
 
-
     //Private WebSocket streams endpoint
+    /**
+     * Spot Account Balance Update
+     */
+    public static final String USER_ACCOUNT_ASSETS_CHANNEL_FORMAT = "spot@private.account.v3.api";
+
+
     /**
      * Spot Account Orders Stream
      */

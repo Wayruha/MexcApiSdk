@@ -3,65 +3,128 @@ package trade.wayruha.mexc.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-import trade.wayruha.mexc.enums.OrderSide;
-import trade.wayruha.mexc.enums.OrderStatus;
-import trade.wayruha.mexc.enums.OrderType;
-import trade.wayruha.mexc.enums.TimeInForce;
+import lombok.*;
+import trade.wayruha.mexc.enums.*;
 
 import java.math.BigDecimal;
 
-@Data
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Order{
+public class Order {
+
     private String symbol;
+
     @JsonAlias({"i"})
     private String orderId;
-    private long orderListId;
+
+    private Long orderListId;
+
     @JsonAlias({"c"})
     private String clientOrderId;
-    @JsonAlias({"p"})
-    private BigDecimal price;
-    @JsonAlias({"ap"})
-    private BigDecimal avgPrice;
-    @JsonAlias({"v"})
-    private BigDecimal origQty;
-    private BigDecimal executedQty;
-    @JsonAlias({"A"})
-    private BigDecimal remainAmount;
-    @JsonAlias({"cv"})
-    private BigDecimal cumulativeQuoteQty;
-    @JsonAlias({"ca"})
-    private BigDecimal cumulativeAmount;
-    @JsonAlias({"a"})
-    private BigDecimal origQuoteOrderQty;
-    private OrderStatus status;
-    private TimeInForce timeInForce;
+
     private OrderType type;
-    private OrderSide side;
-    private BigDecimal stopPrice;
-    private BigDecimal icebergQty;
-
-    @JsonAlias({"O", "createTime"})
-    private long time;
-    private long updateTime;
-    private boolean isWorking;
-    @JsonAlias({"m"})
-    private boolean isMaker;
-
     @JsonProperty("o")
     public void setOrderTypeByAlias(int aliasNumber) {
         this.type = OrderType.findByAlias(aliasNumber);
     }
 
-    @JsonProperty("s")
-    public void setOrderStatusByAlias(int aliasNumber) {
-        this.status = OrderStatus.findByAlias(aliasNumber);
-    }
-
+    private OrderSide side;
     @JsonProperty("S")
     public void setOrderSideByAlias(int aliasNumber) {
         this.side = OrderSide.findByAlias(aliasNumber);
     }
 
+    private OrderStatus status;
+    @JsonProperty("s")
+    public void setOrderStatusByAlias(int aliasNumber) {
+        this.status = OrderStatus.findByAlias(aliasNumber);
+    }
+
+    private boolean isWorking;
+
+    @JsonAlias({"p"})
+    private BigDecimal price;
+
+    @JsonAlias({"P"})
+    private BigDecimal stopPrice;
+
+
+    private StopPriceType stopPriceType;
+
+    @JsonAlias({"T"})
+    public void setStopPriceTypeByAlias(int aliasNumber) {
+        this.stopPriceType = StopPriceType.findByAlias(aliasNumber);
+    }
+
+    @JsonProperty("avgPrice")
+    @JsonAlias({"ap"})
+    private BigDecimal averagePrice;
+
+    @JsonProperty("origQty")
+    @JsonAlias({"v"})
+    private BigDecimal originalQuantity;
+
+    @JsonProperty("executedQty")
+    @JsonAlias({"cv"})
+    private BigDecimal executedQuantity;
+
+    @JsonAlias({"V"})
+    private BigDecimal remainQuantity;
+
+    public BigDecimal getRemainQuantity(){
+        if(isNull(remainQuantity) && nonNull(executedQuantity)){
+            return originalQuantity.subtract(executedQuantity);
+        }
+        return remainQuantity;
+    }
+
+    @JsonProperty("icebergQty")
+    private BigDecimal frozenQuantity;
+
+    @JsonProperty("origQuoteOrderQty")
+    @JsonAlias({"a"})
+    private BigDecimal originalQuoteQuantity;
+
+    @JsonProperty("cummulativeQuoteQty")
+    @JsonAlias({"ca"})
+    private BigDecimal executedQuoteQuantity;
+
+    @JsonAlias({"A"})
+    private BigDecimal remainQuoteQuantity;
+
+    public BigDecimal getRemainQuoteQuantity(){
+        if(isNull(remainQuoteQuantity) && nonNull(executedQuoteQuantity)){
+             return originalQuoteQuantity.subtract(executedQuoteQuantity);
+        }
+        return remainQuoteQuantity;
+    }
+
+    @JsonAlias({"N"})
+    @JsonProperty("commissionAsset")
+    private String commissionAssetSymbol;
+
+    @JsonProperty("commission")
+    private BigDecimal commissionAmount;
+
+    @JsonAlias({"m"})
+    private Boolean isMaker;
+
+    private TimeInForce timeInForce;
+
+    @JsonProperty("time")
+    @JsonAlias({"O", "createTime", "transactTime"})
+    private Long createTimestamp;
+
+    @JsonProperty("updateTime")
+    private Long updateTimestamp;
 }

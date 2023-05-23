@@ -9,19 +9,22 @@ import okhttp3.WebSocketListener;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.MexcApiException;
+import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.MexcResponse;
 import trade.wayruha.mexc.client.helper.HttpClientBuilder;
 import trade.wayruha.mexc.client.helper.RetrofitBuilder;
 
 import java.io.IOException;
 
+import static java.util.Objects.nonNull;
+import static trade.wayruha.mexc.constant.Messages.API_CLIENT_ERROR_MESSAGE_PARSE_EXCEPTION;
+
 @Slf4j
 public class ApiClient {
     @Getter
     private final MexcConfig config;
-    private OkHttpClient httpClient;
+    private final OkHttpClient httpClient;
     private final Retrofit retrofit;
 
     public ApiClient(MexcConfig config) {
@@ -39,17 +42,18 @@ public class ApiClient {
     }
 
     public <T> MexcResponse<T> executeSync(Call<T> call) {
+        String rawRequestData = call.request().toString();
         try {
             final Response<T> response = call.execute();
             final T body = response.body();
             if (response.isSuccessful()) {
                 return new MexcResponse<>(response.code(), body);
-            } else {
-                log.error("Request failed: {} ", response);
-                throw new MexcApiException(response.code(), response.message());
             }
+            String errorMessage = nonNull(response.errorBody()) ? response.errorBody().string() : API_CLIENT_ERROR_MESSAGE_PARSE_EXCEPTION;
+            log.error("Request failed. Request data: {}. Response error message: {} ", rawRequestData, errorMessage);
+            throw new MexcApiException(response.code(), errorMessage);
         } catch (IOException e) {
-            log.error("Request failed: {} ", call.request(), e);
+            log.error("Request failed. Request data: {},  response: {} ", rawRequestData, call.request(), e);
             throw new MexcApiException(e.getMessage(), e);
         }
     }
