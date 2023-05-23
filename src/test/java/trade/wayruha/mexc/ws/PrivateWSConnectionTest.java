@@ -50,7 +50,7 @@ public class PrivateWSConnectionTest {
     }
 
     @SneakyThrows
-    private static void sleep(int timeMs){
+    private static void sleep(long timeMs){
         Thread.sleep(timeMs);
     }
 

@@ -16,7 +16,7 @@ public class RetrofitBuilder {
         builder.client(httpClient);
         builder.addConverterFactory(ObjectToMapConverterFactory.create(objectMapper));
         builder.addCallAdapterFactory(RxJavaCallAdapterFactory.create());
-        builder.baseUrl(configuration.getEndpoint());
+        builder.baseUrl(configuration.getHttpHost());
         return builder.build();
     }
 

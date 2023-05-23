@@ -15,17 +15,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
-import static trade.wayruha.mexc.constant.Constants.LISTEN_KEY_QUERY_PARAM;
 import static trade.wayruha.mexc.constant.GlobalParams.*;
 
 /**
  * This WebSocket Client handles listenKey keep-alive as well as re-subscription (once in 23hrs) automatically
- * !!!WARNING!!! Not tested!
  */
 @Slf4j
 public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
     private PrivateWSSubscriptionService wsService = new PrivateWSSubscriptionService(apiClient);
-    private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService privateWsScheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> scheduledKeepAliveTask;
     private ScheduledFuture<?> scheduledResubscribeTask;
 
@@ -39,16 +37,23 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
             this.wsService = new PrivateWSSubscriptionService(apiClient);
         }
         final String listenKey = wsService.createListenKey();
+        log.trace("{} Got new private key: {} for WS channels: {}", logPrefix, listenKey, channels);
         this.connectionRequest = new Request.Builder()
                 .url(config.getWebSocketHost() + "?" + LISTEN_KEY_QUERY_PARAM + "=" + listenKey)
                 .build();
         super.connect(channels);
 
-        final KeepAliveTask keepAliveTask = new KeepAliveTask(listenKey);
-        this.scheduledKeepAliveTask = this.getScheduler().scheduleAtFixedRate(keepAliveTask,
+        this.scheduledKeepAliveTask = this.getPrivateScheduler().scheduleAtFixedRate(new KeepAlivePrivateWsTask(listenKey),
                 WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN, TimeUnit.MINUTES);
-        this.scheduledResubscribeTask = this.getScheduler().scheduleAtFixedRate(new ResubscribeTask(),
-                WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, WEB_SOCKET_RESUBSCRIBE_PERIOD_MIN, TimeUnit.MINUTES);
+        this.scheduledResubscribeTask = this.getPrivateScheduler().scheduleAtFixedRate(new ResubscribeTask(),
+                WEB_SOCKET_PRIVATE_RESUBSCRIBE_PERIOD_MIN, WEB_SOCKET_PRIVATE_RESUBSCRIBE_PERIOD_MIN, TimeUnit.MINUTES);
+    }
+
+    private ScheduledExecutorService getPrivateScheduler() {
+        if (isNull(this.privateWsScheduler)) {
+            this.privateWsScheduler = Executors.newSingleThreadScheduledExecutor();
+        }
+        return this.privateWsScheduler;
     }
 
     @Override
@@ -58,10 +63,10 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
         scheduledResubscribeTask.cancel(false);
     }
 
-    class KeepAliveTask implements Runnable {
+    class KeepAlivePrivateWsTask implements Runnable {
         private final String renewKey;
 
-        public KeepAliveTask(String renewKey) {
+        public KeepAlivePrivateWsTask(String renewKey) {
             this.renewKey = renewKey;
         }
 
@@ -69,34 +74,23 @@ public class AutoRenewalPrivateWSClient<T> extends WebSocketClient<T> {
         @Override
         public void run() {
             try {
+                log.trace("{} Try to keep alive private key {} for WS channels: {}", logPrefix, renewKey, channels);
                 wsService.keepAliveListenKey(renewKey);
             } catch (Exception ex) {
-                log.error("{} KeepAlive {} error. Reconnecting in {} sec...", logPrefix, renewKey, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
+                log.error("{} KeepAlive for private key {} ends with error for WS channels: {}. Reconnecting in {} sec...",
+                        logPrefix, renewKey, channels, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
                 Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);
                 reConnect();
             }
         }
-    }
-
-    private ScheduledExecutorService getScheduler(){
-        if(isNull(this.scheduler)){
-            this.scheduler = Executors.newSingleThreadScheduledExecutor();
-        }
-        return this.scheduler;
     }
 
     class ResubscribeTask implements Runnable {
         @SneakyThrows
         @Override
         public void run() {
-            try {
-                reConnect();
-            } catch (Exception ex) {
-                log.error("{} Re-subscription error. Try again in {} sec...", logPrefix, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
-                Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);
-                reConnect();
-            }
+            log.trace("{} Try keep alive private WS channels: {}, by reconnect to channels", logPrefix, channels);
+            reConnect();
         }
     }
-
 }
