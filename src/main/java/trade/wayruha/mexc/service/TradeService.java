@@ -1,6 +1,5 @@
 package trade.wayruha.mexc.service;
 
-import org.apache.commons.lang3.StringUtils;
 import trade.wayruha.mexc.MexcConfig;
 import trade.wayruha.mexc.dto.Order;
 import trade.wayruha.mexc.dto.PostOrder;
@@ -21,9 +20,9 @@ public class TradeService extends ServiceBase {
     }
 
     public Order createNewTestOrder(PostOrder newOrder) {
-        var createdOrder = client.executeSync(api.testNewOrder(newOrder, null, null)).getData();
+        var createdOrder = client.executeSync(api.testNewOrder(newOrder)).getData();
         //mexc actually doesn't create test order till 01/05/2023. So we check to emulate answer
-        if(isNull(createdOrder) || isNull(createdOrder.getSymbol())){
+        if (isNull(createdOrder) || isNull(createdOrder.getSymbol())) {
             createdOrder = Order.builder()
                     .symbol(newOrder.getSymbol())
                     .side(newOrder.getSide())
@@ -40,16 +39,15 @@ public class TradeService extends ServiceBase {
     }
 
     public Order createNewOrder(PostOrder order) {
-        return client.executeSync(api.newOrder(order, null, null)).getData();
+        return client.executeSync(api.newOrder(order)).getData();
     }
 
     public Order cancelOrder(PostOrder order) {
         return client.executeSync(api.cancelOrder(order.getSymbol(), order.getOrderId(), order.getClientOrderId(),
-                order.getNewClientOrderId(),null, null)).getData();
+                order.getNewClientOrderId())).getData();
     }
 
-    public List<Order> cancelAllOpenOrders(List<String> symbolList) {
-        var symbols = StringUtils.join(symbolList, ",");
-        return client.executeSync(api.cancelAllOrders(symbols, null, null)).getData();
+    public List<Order> cancelAllOpenOrders(String tradingSymbol) {
+        return client.executeSync(api.cancelAllOrders(tradingSymbol)).getData();
     }
 }
