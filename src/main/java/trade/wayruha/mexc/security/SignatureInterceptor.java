@@ -17,13 +17,16 @@ import java.time.Instant;
 public class SignatureInterceptor implements Interceptor {
     private static final String HEADER_ACCESS_KEY = "X-MEXC-APIKEY";
     private static final String TIMESTAMP_PARAM = "timestamp";
+    private static final String REQUEST_WINDOW_PARAM = "recvWindow";
     private static final String SIGNATURE_PARAM = "signature";
     private final String apiKey;
     private final String secretKey;
+    private final long recvWindow;
 
-    public SignatureInterceptor(String apiKey, String secretKey) {
+    public SignatureInterceptor(String apiKey, String secretKey, long recvWindow) {
         this.apiKey = apiKey;
         this.secretKey = secretKey;
+        this.recvWindow = recvWindow;
     }
 
     @NotNull
@@ -35,12 +38,13 @@ public class SignatureInterceptor implements Interceptor {
         final Request.Builder newBuilder = origRequest.newBuilder();
         final boolean isSigned = origRequest.header(GlobalParams.ENDPOINT_SECURITY_SIGNED) != null;
         newBuilder.removeHeader(GlobalParams.ENDPOINT_SECURITY_SIGNED);
+        String timestamp = String.valueOf(Instant.now().toEpochMilli());
         if (isSigned) {
             newBuilder.addHeader(HEADER_ACCESS_KEY, apiKey);
             final RequestBody origBody = origRequest.body();
             if (origBody != null && origBody.contentLength() > 0) {
                 // encode RequestBody
-                final String newBody = encodeBody(origBody);
+                final String newBody = encodeBody(origBody, timestamp);
                 switch (method) {
                     case "POST":
                         newBuilder.post(RequestBody.create(MediaType.get("application/json"), newBody));
@@ -50,7 +54,7 @@ public class SignatureInterceptor implements Interceptor {
                 }
             } else {
                 // encode Request URL
-                final Request encodedRequest = encodeUrl(origRequest);
+                final Request encodedRequest = encodeUrl(origRequest, timestamp);
                 return chain.proceed(encodedRequest);
             }
         }
@@ -58,12 +62,12 @@ public class SignatureInterceptor implements Interceptor {
         return chain.proceed(request);
     }
 
-    private Request encodeUrl(Request request) {
-        String timestamp = Instant.now().toEpochMilli() + "";
+    private Request encodeUrl(Request request, String timestamp) {
         HttpUrl url = request.url();
         HttpUrl.Builder urlBuilder = url
                 .newBuilder()
-                .setQueryParameter(TIMESTAMP_PARAM, timestamp);
+                .setQueryParameter(TIMESTAMP_PARAM, timestamp)
+                .setQueryParameter(REQUEST_WINDOW_PARAM, String.valueOf(recvWindow));
         String queryParams = urlBuilder.build().query();
         final String signature = SignatureUtil.actualSignature(queryParams, secretKey);
         urlBuilder.setQueryParameter(SIGNATURE_PARAM, signature);
@@ -72,10 +76,10 @@ public class SignatureInterceptor implements Interceptor {
                 .url(urlBuilder.build()).build();
     }
 
-    private String encodeBody(RequestBody origBody) {
-        String timestamp = Instant.now().toEpochMilli() + "";
+    private String encodeBody(RequestBody origBody, String timestamp) {
         String params = bodyToString(origBody);
         params += "&" + TIMESTAMP_PARAM + "=" + timestamp;
+        params += "&" + REQUEST_WINDOW_PARAM + "=" + recvWindow;
         String signature = SignatureUtil.actualSignature(params, secretKey);
         params += "&" + SIGNATURE_PARAM + "=" + signature;
         return params;

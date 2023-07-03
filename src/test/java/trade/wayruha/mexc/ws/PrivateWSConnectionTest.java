@@ -24,7 +24,7 @@ public class PrivateWSConnectionTest {
     final PrivateWSSubscriptionService privateAPI = new PrivateWSSubscriptionService(apiClient);
 
     @Test
-    public void test_userSpotAccountOrder() {
+    public void test_getUserSpotAccountOrderUpdates() {
         final Callback callback = new Callback();
         final WebSocketClient ws = factory.userSpotOrdersSubscription(callback);
         sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
@@ -33,7 +33,7 @@ public class PrivateWSConnectionTest {
     }
 
     @Test
-    public void test_userAccountAssetsChange() {
+    public void test_getUserAccountAssetsUpdates() {
         final Callback callback = new Callback();
         final WebSocketClient ws = factory.userAccountAssetsSubscription(callback);
         sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
@@ -41,7 +41,7 @@ public class PrivateWSConnectionTest {
         assertTrue(wsResponseCounter.get() > 0);
     }
     @Test
-    public void test_userSpotDealsSubscription() {
+    public void test_getUserSpotDealsUpdates() {
         final Callback callback = new Callback();
         final WebSocketClient ws = factory.userSpotDealsSubscription(callback);
         sleep(GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS);
