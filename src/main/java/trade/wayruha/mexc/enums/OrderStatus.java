@@ -8,6 +8,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum OrderStatus {
+    CREATED(0),
     NEW(1),
     FILLED(2),
     PARTIALLY_FILLED(3),
