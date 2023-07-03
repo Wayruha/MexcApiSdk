@@ -10,7 +10,6 @@ import trade.wayruha.mexc.enums.OrderSide;
 import trade.wayruha.mexc.enums.OrderType;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 import static trade.wayruha.mexc.util.TestConstants.*;
@@ -42,7 +41,7 @@ public class TradeServiceTest {
 
     @Test
     public void test_cancelAllOpenOrders() {
-       var closedOrders = service.cancelAllOpenOrders(List.of(BTC_USD_PAIR_SYMBOL));
+       var closedOrders = service.cancelAllOpenOrders(BTC_USD_PAIR_SYMBOL);
         Assert.assertNotNull(closedOrders);
     }
 }

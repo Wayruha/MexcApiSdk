@@ -34,7 +34,7 @@ public class HttpClientBuilder {
             clientBuilder.addInterceptor(loggingInterceptor);
         }
         if(isNotEmpty(config.getApiKey())) {
-            final SignatureInterceptor signatureInterceptor = new SignatureInterceptor(config.getApiKey(), config.getApiSecret());
+            final SignatureInterceptor signatureInterceptor = new SignatureInterceptor(config.getApiKey(), config.getApiSecret(), config.getRecvWindow());
             clientBuilder.addInterceptor(signatureInterceptor);
         }
         return clientBuilder.build();

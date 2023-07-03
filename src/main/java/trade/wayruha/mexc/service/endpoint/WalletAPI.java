@@ -10,6 +10,7 @@ import trade.wayruha.mexc.dto.Order;
 
 import java.util.List;
 
+
 public interface WalletAPI {
 
     @GET("api/v3/allOrders")
@@ -20,8 +21,7 @@ public interface WalletAPI {
     @GET("api/v3/order")
     @Headers(GlobalParams.ENDPOINT_SECURITY_SIGNED_HEADER)
     Call<Order> getOrder(@Query("symbol") String symbol, @Query("orderId") String orderId,
-                         @Query("origClientOrderId") String origClientOrderId, @Query("recvWindow") Long recvWindow,
-                         @Query("timestamp") Long timestamp);
+                         @Query("origClientOrderId") String origClientOrderId);
 
     @GET("/api/v3/account")
     @Headers(GlobalParams.ENDPOINT_SECURITY_SIGNED_HEADER)

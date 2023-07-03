@@ -14,28 +14,29 @@ public class MexcConfig {
     private String apiSecret;
     private String passphrase;
     private String httpHost;
+    private long recvWindow;
     private String webSocketHost;
     private boolean webSocketReconnectAlways;
     private int webSocketMaxReconnectAttemptNumber;
     private int webSocketChannelKeepAlivePeriodSec;
 
     public MexcConfig() {
-        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, "", "", null, null);
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, "", "", null, null, null);
     }
 
     public MexcConfig(String apiKey, String apiSecret) {
-        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, null, null);
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, null, null, null);
     }
 
     public MexcConfig(String httpHost, String webSocketHost, String apiKey, String apiSecret) {
-        this(httpHost, webSocketHost, apiKey, apiSecret, null, null);
+        this(httpHost, webSocketHost, apiKey, apiSecret, null, null, null);
     }
 
     public MexcConfig(String apiKey, String apiSecret, Boolean webSocketReconnectAlways, Integer webSocketMaxReconnectAttemptNumber) {
-        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, webSocketReconnectAlways, webSocketMaxReconnectAttemptNumber);
+        this(DEFAULT_HTTP_HOST, DEFAULT_WS_HOST, apiKey, apiSecret, null, webSocketReconnectAlways, webSocketMaxReconnectAttemptNumber);
     }
 
-    public MexcConfig(String httpHost, String webSocketHost, String apiKey, String apiSecret,
+    public MexcConfig(String httpHost, String webSocketHost, String apiKey, String apiSecret, Long connectTimeoutDefault,
                       Boolean webSocketReconnectAlways, Integer webSocketMaxReconnectAttemptNumber) {
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -47,6 +48,7 @@ public class MexcConfig {
         this.writeTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
         this.retryOnConnectionFailure = true;
         this.print = false;
+        this.recvWindow = nonNull(connectTimeoutDefault) ? connectTimeoutDefault : GlobalParams.DEFAULT_CONNECTION_TTL;
         this.webSocketReconnectAlways = nonNull(webSocketReconnectAlways) ? webSocketReconnectAlways : false;
         this.webSocketMaxReconnectAttemptNumber = nonNull(webSocketMaxReconnectAttemptNumber) ? webSocketMaxReconnectAttemptNumber : GlobalParams.WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER;
         this.webSocketChannelKeepAlivePeriodSec = GlobalParams.WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC;
