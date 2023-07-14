@@ -22,6 +22,10 @@ public interface TradeAPI {
     Call<Order> cancelOrder(@Query("symbol") String symbol, @Query("orderId") String orderId,
                             @Query("origClientOrderId") String origClientOrderId, @Query("newClientOrderId") String newClientOrderId);
 
+    @GET("api/v3/openOrders")
+    @Headers(GlobalParams.ENDPOINT_SECURITY_SIGNED_HEADER)
+    Call<List<Order>> getAllOpenOrders(@Query("symbol") String symbol);
+
     /** maximum input 5 symbols,separated by ",". e.g. "BTCUSDT,MXUSDT,ADAUSDT" */
     @DELETE("api/v3/openOrders")
     @Headers(GlobalParams.ENDPOINT_SECURITY_SIGNED_HEADER)

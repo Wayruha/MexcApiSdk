@@ -47,6 +47,10 @@ public class TradeService extends ServiceBase {
                 order.getNewClientOrderId())).getData();
     }
 
+    public List<Order> getAllOpenOrders(String tradingSymbol) {
+        return client.executeSync(api.getAllOpenOrders(tradingSymbol)).getData();
+    }
+
     public List<Order> cancelAllOpenOrders(String tradingSymbol) {
         return client.executeSync(api.cancelAllOrders(tradingSymbol)).getData();
     }
