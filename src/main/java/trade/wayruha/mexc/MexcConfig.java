@@ -43,12 +43,12 @@ public class MexcConfig {
         this.passphrase = null;
         this.httpHost = httpHost;
         this.webSocketHost = webSocketHost;
-        this.connectTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
-        this.readTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
-        this.writeTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT;
+        this.connectTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT_MS;
+        this.readTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT_MS;
+        this.writeTimeout = GlobalParams.DEFAULT_CONNECTION_TIMEOUT_MS;
         this.retryOnConnectionFailure = true;
         this.print = false;
-        this.recvWindow = nonNull(connectTimeoutDefault) ? connectTimeoutDefault : GlobalParams.DEFAULT_CONNECTION_TTL;
+        this.recvWindow = nonNull(connectTimeoutDefault) ? connectTimeoutDefault : GlobalParams.DEFAULT_CONNECTION_TTL_MS;
         this.webSocketReconnectAlways = nonNull(webSocketReconnectAlways) ? webSocketReconnectAlways : false;
         this.webSocketMaxReconnectAttemptNumber = nonNull(webSocketMaxReconnectAttemptNumber) ? webSocketMaxReconnectAttemptNumber : GlobalParams.WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER;
         this.webSocketChannelKeepAlivePeriodSec = GlobalParams.WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC;
