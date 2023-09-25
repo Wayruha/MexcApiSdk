@@ -22,13 +22,13 @@ public enum OrderSide {
 
     private final int aliasNumber;
 
-    public static OrderSide findByAlias(int aliasNumber){
-        return Arrays.stream(OrderSide.values()).parallel().filter(s-> s.getAliasNumber() == aliasNumber)
+    public static OrderSide findByAlias(int aliasNumber) {
+        return Arrays.stream(OrderSide.values()).parallel().filter(s -> s.getAliasNumber() == aliasNumber)
                 .findFirst().orElse(null);
     }
 
-    public static OrderSide findByName(String name){
-        return Arrays.stream(OrderSide.values()).parallel().filter(s-> s.name().equals(name))
+    public static OrderSide findByName(String name) {
+        return Arrays.stream(OrderSide.values()).parallel().filter(s -> s.name().equals(name))
                 .findFirst().orElse(null);
     }
 }
