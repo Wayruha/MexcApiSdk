@@ -17,6 +17,7 @@ public class MexcConfig {
     private long recvWindow;
     private String webSocketHost;
     private boolean webSocketReconnectAlways;
+    private int webSocketMaxChannelsPerConnection;
     private int webSocketMaxReconnectAttemptNumber;
     private int webSocketChannelKeepAlivePeriodSec;
 
@@ -50,6 +51,7 @@ public class MexcConfig {
         this.print = false;
         this.recvWindow = nonNull(connectTimeoutDefault) ? connectTimeoutDefault : GlobalParams.DEFAULT_CONNECTION_TTL_MS;
         this.webSocketReconnectAlways = nonNull(webSocketReconnectAlways) ? webSocketReconnectAlways : false;
+        this.webSocketMaxChannelsPerConnection = GlobalParams.WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION;
         this.webSocketMaxReconnectAttemptNumber = nonNull(webSocketMaxReconnectAttemptNumber) ? webSocketMaxReconnectAttemptNumber : GlobalParams.WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER;
         this.webSocketChannelKeepAlivePeriodSec = GlobalParams.WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC;
     }

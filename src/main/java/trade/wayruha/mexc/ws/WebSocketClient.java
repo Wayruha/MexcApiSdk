@@ -18,6 +18,7 @@ import trade.wayruha.mexc.enums.WSState;
 import trade.wayruha.mexc.utils.IdGenerator;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -26,7 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static trade.wayruha.mexc.constant.GlobalParams.WEB_SOCKET_RECONNECTION_DELAY_MS;
 import static trade.wayruha.mexc.constant.Messages.WEBSOCKET_INTERRUPTED_EXCEPTION;
 
@@ -38,7 +39,7 @@ public class WebSocketClient<T> extends WebSocketListener {
     @Getter
     protected final Set<String> channels;
     @Getter
-    protected Set<String> canceledChannels;
+    protected final Set<String> failedChannels;
     @Getter
     protected final int id;
     protected final ObjectMapper objectMapper;
@@ -63,7 +64,8 @@ public class WebSocketClient<T> extends WebSocketListener {
                     Class<T> type, ApiClient apiClient, ObjectMapper mapper) {
         this.id = IdGenerator.getNextId();
         this.logPrefix = "[ws-" + this.id + "]";
-        this.channels = new HashSet<>();
+        this.channels = Collections.synchronizedSet(new HashSet<>());
+        this.failedChannels = Collections.synchronizedSet(new HashSet<>());
         this.type = type;
         this.callback = listener;
         this.apiClient = apiClient;
@@ -72,26 +74,29 @@ public class WebSocketClient<T> extends WebSocketListener {
         this.connectionRequest = connectionRequest;
         this.scheduler = Executors.newSingleThreadScheduledExecutor();
         connect(channels);
+        //create ping task for keep alive WS connection if no messages were produced be server
+        this.scheduledPingTask = scheduler.scheduleAtFixedRate(new PingTask(),
+                this.config.getWebSocketChannelKeepAlivePeriodSec(), this.config.getWebSocketChannelKeepAlivePeriodSec(), TimeUnit.SECONDS);
     }
 
     protected void connect(Set<String> newChannels) {
+        if (newChannels.isEmpty()) {
+            log.info("{} Attempt to connect to empty channels list will be skipped.", logPrefix);
+            return;
+        }
         if (this.state != WSState.CONNECTED && this.state != WSState.CONNECTING) {
-            log.debug("{} Connecting to channels {} ...", logPrefix, newChannels);
+            log.debug("{} Start connecting to channels: {} ...", logPrefix, newChannels);
             this.state = WSState.CONNECTING;
             this.webSocket = apiClient.createWebSocket(this.connectionRequest, this);
             if (this.webSocket == null) {
                 log.error("Error connect {}", this.connectionRequest);
             }
         } else {
-            log.warn("{} Already connected to channels {}", logPrefix, channels);
+            log.warn("{} WS is already opened and connected to channels: {}", logPrefix, channels);
         }
-        if (!newChannels.isEmpty()) {
+        if (isNotEmpty(newChannels)) {
             this.subscribe(newChannels);
-            //create ping task for keep alive WS connection if no messages were produced be server
-            this.scheduledPingTask = scheduler.scheduleAtFixedRate(new PingTask(),
-                    this.config.getWebSocketChannelKeepAlivePeriodSec(), this.config.getWebSocketChannelKeepAlivePeriodSec(), TimeUnit.SECONDS);
         }
-        currentReconnectAttemptIndex.set(0);//reset reconnection indexer due to successful connection
     }
 
     public void sendRequest(String request) {
@@ -108,8 +113,10 @@ public class WebSocketClient<T> extends WebSocketListener {
 
     @SneakyThrows
     public void subscribe(Collection<String> newChannels) {
-        if (this.channels.size() + newChannels.size() > this.config.getWebSocketMaxReconnectAttemptNumber())
-            throw new IllegalArgumentException("Can't subscribe to more then " + WEB_SOCKET_MAX_CHANNELS_PER_CONNECTION + " channels in single WS connection");
+        log.trace("{} Compose connection request for channels: {}", logPrefix, newChannels.toString());
+        if (this.channels.size() + newChannels.size() > this.config.getWebSocketMaxChannelsPerConnection()) {
+            throw new IllegalArgumentException("Can't subscribe to more then " + this.config.getWebSocketMaxChannelsPerConnection() + " channels in single WS connection");
+        }
         final Message msg = new Message(Action.SUBSCRIPTION, newChannels);
         final String content = objectMapper.writeValueAsString(msg);
         this.sendRequest(content);
@@ -125,11 +132,11 @@ public class WebSocketClient<T> extends WebSocketListener {
     }
 
     @SneakyThrows
-    public void unsubscribe(Collection<String> channels) {
-        final Message msg = new Message(Action.UNSUBSCRIPTION, channels);
+    public void unsubscribe(Collection<String> deletedChannels) {
+        final Message msg = new Message(Action.UNSUBSCRIPTION, deletedChannels);
         final String content = objectMapper.writeValueAsString(msg);
         sendRequest(content);
-        this.channels.removeAll(channels);
+        this.channels.removeAll(deletedChannels);
     }
 
     public void close() {
@@ -140,22 +147,23 @@ public class WebSocketClient<T> extends WebSocketListener {
             webSocket = null;
         }
         this.channels.clear();
-        scheduledPingTask.cancel(false);
     }
 
     public boolean reConnect() {
-        var success = false;
-        this.canceledChannels = new HashSet<>();
-        this.canceledChannels.addAll(this.channels);
-        while (!success &&
-                (this.config.isWebSocketReconnectAlways() || currentReconnectAttemptIndex.incrementAndGet() < this.config.getWebSocketMaxReconnectAttemptNumber())) {
+        if (!this.failedChannels.isEmpty()) {
+            log.trace("{} already reConnecting to channels: {}", logPrefix, this.failedChannels);
+            return true;
+        }
+        this.failedChannels.addAll(this.channels);
+        while (!this.failedChannels.isEmpty() &&
+                (this.config.isWebSocketReconnectAlways() || currentReconnectAttemptIndex.get() < this.config.getWebSocketMaxReconnectAttemptNumber())) {
             try {
+                currentReconnectAttemptIndex.incrementAndGet();
                 log.debug("{} Try to reconnect to WebSocket channels: {}. Attempt #{}",
-                        logPrefix, this.canceledChannels, currentReconnectAttemptIndex.get());
+                        logPrefix, this.failedChannels, currentReconnectAttemptIndex.get());
                 this.close();
-                this.connect(this.canceledChannels);
-                success = true;
-                this.canceledChannels.clear();
+                this.connect(this.failedChannels);
+                Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);
             } catch (Exception e) {
                 log.error("{} [Connection error] Error to reconnect {}", logPrefix, e.getMessage(), e);
                 try {
@@ -165,13 +173,23 @@ public class WebSocketClient<T> extends WebSocketListener {
                 }
             }
         }
-        log.debug("{} Successfully reconnected to WebSocket channels: {}.", logPrefix, this.channels);
-        return success;
+        if (isNotEmpty(failedChannels)) {
+            log.warn("{} [Connection error] After {} attempts we couldn't reconnect to WebSocket for channels: {}.",
+                    logPrefix, this.config.getWebSocketMaxReconnectAttemptNumber(), failedChannels);
+            failedChannels.clear();
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
         super.onOpen(webSocket, response);
+        //clear failed channels due to successful connection
+        this.failedChannels.clear();
+        //reset reconnection indexer due to successful connection
+        currentReconnectAttemptIndex.set(0);
         log.debug("{} onOpen WS event: Connected to channels {}", logPrefix, this.channels);
         state = WSState.CONNECTED;
         lastReceivedTime = System.currentTimeMillis();
@@ -212,12 +230,12 @@ public class WebSocketClient<T> extends WebSocketListener {
         }
         log.warn("{} onFailure WS event cause: {}", logPrefix, t.getMessage());
         if (this.reConnect()) {//try to reconnect
-            log.trace("{} [Connection error] Reconnection to WebSocket channels: {} was successfully.",
-                    logPrefix, this.channels); //reconnect was successful
+            log.trace("{} [Connection error] Reconnection to WebSocket channels: {} was initiated.",
+                    logPrefix, this.channels);
         } else {
-            log.warn("{} [Connection error] After {} attempts we couldn't reconnect to WebSocket for channels: {}.",
-                    logPrefix, this.config.getWebSocketMaxReconnectAttemptNumber(), this.canceledChannels);
-            this.canceledChannels.clear();
+            log.warn("{} [Connection error] After {} attempts we couldn't reconnect to WebSocket for all channels: {}.",
+                    logPrefix, this.config.getWebSocketMaxReconnectAttemptNumber(), this.channels);
+            this.failedChannels.clear();
             super.onFailure(webSocket, t, response);
             closeOnError(t);
             callback.onFailure(t, response);
@@ -233,6 +251,7 @@ public class WebSocketClient<T> extends WebSocketListener {
                 ex != null ? ex.getMessage() : WEBSOCKET_INTERRUPTED_EXCEPTION);
         this.close();
         state = WSState.CLOSED_ON_ERROR;
+        scheduledPingTask.cancel(false);
     }
 
     static Request buildRequestFromHost(String host) {
@@ -255,7 +274,9 @@ public class WebSocketClient<T> extends WebSocketListener {
         @Override
         public void run() {
             try {
-                ping(channels);
+                if (isNotEmpty(channels)) {
+                    ping(channels);
+                }
             } catch (Exception ex) {
                 log.error("{} Ping error. Try to reconnect and send again in {} sec...", logPrefix, WEB_SOCKET_RECONNECTION_DELAY_MS / 1000);
                 Thread.sleep(WEB_SOCKET_RECONNECTION_DELAY_MS);

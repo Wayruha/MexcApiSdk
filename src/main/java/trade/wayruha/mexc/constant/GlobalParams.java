@@ -17,5 +17,5 @@ public class GlobalParams {
     public static int WEB_SOCKET_CHANNEL_KEEP_ALIVE_PERIOD_SEC = 55;
     public static int WEB_SOCKET_KEEP_ALIVE_PERIOD_MIN = 45;
     public static int WEB_SOCKET_PRIVATE_RESUBSCRIBE_PERIOD_MIN = 23 * 60;
-    public static int WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER = 5;
+    public static int WEB_SOCKET_RECONNECT_ATTEMPT_NUMBER = 50;
 }
