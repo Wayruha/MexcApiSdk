@@ -23,7 +23,7 @@ public enum OrderStatus {
     }
 
     public boolean isFinished() {
-        return this != NEW && this != PARTIALLY_FILLED;
+        return this != NEW && this != CREATED && this != PARTIALLY_FILLED;
     }
 
     public boolean isExecuted() {

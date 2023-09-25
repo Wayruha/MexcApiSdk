@@ -40,6 +40,12 @@ public class TradeServiceTest {
     }
 
     @Test
+    public void test_getAllOpenOrders() {
+        var openOrders = service.getAllOpenOrders(UNUSED_PAIR_SYMBOL);
+        Assert.assertTrue(openOrders.isEmpty());
+    }
+
+    @Test
     public void test_cancelAllOpenOrders() {
        var closedOrders = service.cancelAllOpenOrders(BTC_USD_PAIR_SYMBOL);
         Assert.assertNotNull(closedOrders);
