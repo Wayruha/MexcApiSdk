@@ -24,11 +24,11 @@ public class WalletService extends ServiceBase {
     }
 
     public Order getOrder(String symbol, String orderId) {
-        return this.getOrder(symbol, orderId, null, null, null);
+        return this.getOrder(symbol, orderId, null);
     }
 
-    public Order getOrder(String symbol, String orderId, String origClientOrderId, Long recvWindow, Long timestamp) {
-        return client.executeSync(api.getOrder(symbol, orderId, origClientOrderId, recvWindow, timestamp)).getData();
+    public Order getOrder(String symbol, String orderId, String origClientOrderId) {
+        return client.executeSync(api.getOrder(symbol, orderId, origClientOrderId)).getData();
     }
 
     public AccountInfo getUserAccountInfo() {

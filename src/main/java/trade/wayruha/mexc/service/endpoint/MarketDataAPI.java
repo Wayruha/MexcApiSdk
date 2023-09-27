@@ -19,9 +19,7 @@ public interface MarketDataAPI {
     Call<OrderBook> getOrderBookInfo(@NotNull @Query("symbol") String pairSymbol,
                                      @NotNull @Query("limit") Integer limit);
 
-    /**
-     * If the symbol is not sent, all symbols will be returned in an array.
-     */
+    /** If the symbol is not sent, all symbols will be returned in an array.*/
     @GET("/api/v3/ticker/price")
     Call<TickerPrice> getTickerPriceInfo(@NotNull @Query("symbol") String pairSymbol);
 
